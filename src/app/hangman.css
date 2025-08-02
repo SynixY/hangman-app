@@ -1,0 +1,818 @@
+/* Updated Hangman Game Styles */
+
+/* Make the main scrapbook a flex column to organize its new children */
+.scrapbook {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make the chat timeline grow and push the input to the bottom */
+.scrapbook .timeline {
+  flex: 1;
+  min-height: 0;
+  height: auto !important; /* Forces override of original fixed height */
+}
+
+/* --- FIX FOR BUTTONS --- */
+/* As you pointed out, reduce the button width to prevent overflow */
+.game-input-actions .small {
+  width: 150px !important;
+}
+
+/* Hangman Display */
+.hangman-container {
+  width: 100%;
+  padding: 15px 15px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.hangman-visual {
+  height: 80px;
+  width: 100%;
+  border-radius: 10px;
+  background-color: rgba(38, 28, 92, 0.2);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hangman-lives {
+  font-family: "Black", sans-serif;
+  color: #fff;
+  font-size: 24px;
+  text-shadow: 2px 2px 0px #301a6b;
+  letter-spacing: 2px;
+}
+
+.hangman-word {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.hangman-word-letter {
+  font-family: "Black", sans-serif;
+  font-size: 32px;
+  color: #fff;
+  background-color: rgba(38, 28, 92, 0.5);
+  min-width: 45px;
+  height: 55px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 6px;
+  border-bottom: 4px solid rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+}
+
+/* Game Input Controls */
+.game-input-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px; /* Symmetrical padding */
+  box-sizing: border-box;
+}
+
+.game-input-field {
+  flex-grow: 1;
+}
+
+.game-input-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .game-input-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .game-input-actions {
+    justify-content: space-around;
+  }
+
+  .game-input-actions button {
+    flex: 1;
+  }
+}
+
+/* Game End Modal Styles */
+.game-end-modal-content {
+  border: 5px solid;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden; /* Important for confetti effect */
+}
+
+.game-end-modal-content.winner {
+  background-color: #2e1a64;
+  border-color: #ffd700;
+}
+
+.game-end-modal-content.loser {
+  background-color: #333;
+  border-color: #555;
+}
+
+.win-title {
+  color: #ffd700 !important; /* Gold color */
+  text-shadow: 0 0 10px #ffd700, 0 0 20px #ffc400;
+}
+
+.lose-title {
+  color: #aaa !important;
+}
+
+.modal-subtitle {
+  font-family: "Bold", sans-serif;
+  font-size: 18px;
+  color: #fff;
+  margin: 15px 0 25px;
+  text-align: center;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+}
+
+/* Confetti Animation */
+.confetti-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 20px;
+  background-color: #ffd700;
+  opacity: 0.7;
+  animation: confetti-fall 5s linear infinite;
+}
+
+.confetti-0 {
+  left: 10%;
+  animation-delay: 0s;
+  background-color: #ffc400;
+}
+.confetti-1 {
+  left: 20%;
+  animation-delay: -0.5s;
+  background-color: #4ce0aa;
+}
+.confetti-2 {
+  left: 30%;
+  animation-delay: -1s;
+  background-color: #fff;
+}
+.confetti-3 {
+  left: 40%;
+  animation-delay: -1.5s;
+  background-color: #ffc400;
+}
+.confetti-4 {
+  left: 50%;
+  animation-delay: -2s;
+  background-color: #4ce0aa;
+}
+.confetti-5 {
+  left: 60%;
+  animation-delay: -2.5s;
+  background-color: #fff;
+}
+.confetti-6 {
+  left: 70%;
+  animation-delay: -3s;
+  background-color: #ffc400;
+}
+.confetti-7 {
+  left: 80%;
+  animation-delay: -3.5s;
+  background-color: #4ce0aa;
+}
+.confetti-8 {
+  left: 90%;
+  animation-delay: -4s;
+  background-color: #fff;
+}
+.confetti-9 {
+  left: 15%;
+  animation-delay: -0.2s;
+  background-color: #ffc400;
+}
+.confetti-10 {
+  left: 25%;
+  animation-delay: -0.8s;
+  background-color: #4ce0aa;
+}
+.confetti-11 {
+  left: 35%;
+  animation-delay: -1.2s;
+  background-color: #fff;
+}
+.confetti-12 {
+  left: 45%;
+  animation-delay: -1.8s;
+  background-color: #ffc400;
+}
+.confetti-13 {
+  left: 55%;
+  animation-delay: -2.2s;
+  background-color: #4ce0aa;
+}
+.confetti-14 {
+  left: 65%;
+  animation-delay: -2.8s;
+  background-color: #fff;
+}
+
+@keyframes confetti-fall {
+  0% {
+    top: -20px;
+    transform: rotate(0deg);
+  }
+  100% {
+    top: 110%;
+    transform: rotate(720deg);
+  }
+}
+
+/* --- Game End Modal Styles --- */
+
+/* Z-Index fix to ensure modal is on top */
+.modal-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* High z-index to be on top of everything */
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-content {
+  position: relative;
+  width: 550px; /* Larger size */
+  padding: 40px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  transform: scale(0.86); /* Match the game screen scale */
+}
+
+/* --- Casino WINNER Style --- */
+.modal-content.winner {
+  background: radial-gradient(ellipse at top, #4a2a8a, #2a1a4f);
+  border: 4px solid #ffd700;
+  box-shadow: 0 0 25px #ffd700, inset 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.win-title {
+  font-family: "Black", sans-serif;
+  font-size: 52px;
+  color: #ffd700;
+  text-transform: uppercase;
+  text-shadow: 0 0 5px #ffd700, 0 0 15px #ffd700, 0 0 30px #ffc400;
+}
+
+.win-prize {
+  color: #5cffb6; /* Use existing green highlight color */
+  text-shadow: 0 0 10px #5cffb6;
+}
+
+/* --- Casino LOSER Style --- */
+.modal-content.loser {
+  background: #2d3436;
+  border: 4px solid #555;
+}
+
+.lose-title {
+  font-family: "Black", sans-serif;
+  font-size: 52px;
+  color: #999;
+  text-transform: uppercase;
+}
+
+.lose-prize {
+  color: #ff7675; /* A reddish color */
+}
+
+/* General Modal Text Styles */
+.modal-subtitle {
+  font-family: "Bold", sans-serif;
+  font-size: 20px;
+  color: #fff;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.prize-amount {
+  display: block;
+  font-family: "Black", sans-serif;
+  font-size: 28px;
+  margin-top: 10px;
+}
+
+.modal-actions button {
+  width: 200px; /* Larger button */
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* --- Casino Win/Lose Modal --- */
+
+/* 1. Background Overlay */
+.modal-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* High z-index to be on top */
+  backdrop-filter: blur(5px);
+}
+
+/* 2. Main Modal Container */
+.win-modal-container {
+  position: relative;
+  width: 90%;
+  max-width: 600px;
+  padding: 40px 20px;
+  border-radius: 20px;
+  background: radial-gradient(ellipse at bottom, #4c2c96 0%, #1e103f 100%);
+  border: 4px solid #7c6fc9;
+  box-shadow: 0 0 15px #cbb6e9, inset 0 0 10px rgba(255, 255, 255, 0.1);
+  text-align: center;
+  overflow: hidden;
+  transform: scale(0.9);
+  animation: modal-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* 3. Animated Sparkle Background */
+.sparkle-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(
+      circle at 20% 30%,
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px
+    ),
+    radial-gradient(
+      circle at 80% 10%,
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px
+    ),
+    radial-gradient(
+      circle at 50% 70%,
+      rgba(255, 255, 255, 0.1) 2px,
+      transparent 2px
+    ),
+    radial-gradient(
+      circle at 90% 90%,
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px
+    );
+  background-size: 100px 100px;
+  animation: sparkle 20s linear infinite;
+}
+
+/* 4. Animated Light Beams (for winners) */
+.light-beams {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+}
+.win-modal-container.winner .light-beams {
+  opacity: 1;
+}
+.light-beams .beam {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 400%;
+  background: linear-gradient(
+    to top,
+    transparent,
+    rgba(92, 255, 182, 0.5),
+    transparent
+  );
+  animation: rotate-beam 15s linear infinite;
+}
+.light-beams .beam:nth-child(2) {
+  animation-delay: -5s;
+}
+.light-beams .beam:nth-child(3) {
+  animation-delay: -10s;
+}
+
+/* 5. 3D/Neon Title */
+.win-modal-title {
+  font-family: "Black", sans-serif;
+  font-size: 5rem;
+  line-height: 1;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+.win-modal-title span {
+  display: inline-block;
+  transform: translateY(50px);
+  opacity: 0;
+  animation: drop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+/* Creates arched text effect */
+.win-modal-title span:nth-child(1) {
+  transform: rotate(-15deg);
+}
+.win-modal-title span:nth-child(2) {
+  transform: rotate(-10deg);
+}
+.win-modal-title span:nth-child(3) {
+  transform: rotate(-5deg);
+}
+.win-modal-title span:nth-child(4) {
+  transform: translateY(-5px);
+}
+.win-modal-title span:nth-child(5) {
+  transform: rotate(5deg);
+}
+.win-modal-title span:nth-child(6) {
+  transform: rotate(10deg);
+}
+.win-modal-title span:nth-child(7) {
+  transform: rotate(15deg);
+}
+
+.winner-title {
+  color: #ffd700;
+  text-shadow: 0 0 5px #fff, 0 0 15px #ffd700, 0 0 30px #ffae00,
+    -2px 2px 2px rgba(0, 0, 0, 0.5);
+}
+.loser-title {
+  color: #b0b0c0;
+  text-shadow: -2px 2px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* 6. Subtitle & Reward Banner */
+.win-modal-subtitle {
+  font-family: "Bold", sans-serif;
+  font-size: 1.2rem;
+  color: #d8d2f5;
+  margin: 0 0 20px 0;
+  position: relative;
+  z-index: 2;
+}
+.win-modal-reward-banner {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  position: relative;
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.win-modal-amount {
+  font-family: "Black", sans-serif;
+  font-size: 2.5rem;
+}
+.winner-amount {
+  color: #5cffb6;
+}
+.loser-amount {
+  color: #e63946;
+}
+
+/* 7. Button and Keyframes */
+.win-modal-button {
+  min-width: 200px;
+  z-index: 2;
+}
+
+@keyframes modal-pop-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes sparkle {
+  0% {
+    background-position: 0 0, 0 0, 0 0, 0 0;
+  }
+  100% {
+    background-position: -200px -200px, -150px 150px, 100px -100px, -50px 50px;
+  }
+}
+@keyframes rotate-beam {
+  from {
+    transform: translateX(-50%) translateY(-50%) rotate(0deg);
+  }
+  to {
+    transform: translateX(-50%) translateY(-50%) rotate(360deg);
+  }
+}
+@keyframes drop-in {
+  to {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+}
+
+/* --- Casino Win/Lose Modal --- */
+
+/* 1. Background Overlay */
+.modal-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* High z-index to be on top */
+  backdrop-filter: blur(5px);
+}
+
+/* 2. Main Modal Container */
+.win-modal-container {
+  position: relative;
+  width: 90%;
+  max-width: 600px;
+  padding: 40px 20px;
+  border-radius: 20px;
+  background: radial-gradient(ellipse at bottom, #4c2c96 0%, #1e103f 100%);
+  border: 4px solid #7c6fc9;
+  box-shadow: 0 0 15px #cbb6e9, inset 0 0 10px rgba(255, 255, 255, 0.1);
+  text-align: center;
+  overflow: hidden;
+  transform: scale(0.9);
+  animation: modal-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* 3. Animated Sparkle Background */
+.sparkle-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(
+      circle at 20% 30%,
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px
+    ),
+    radial-gradient(
+      circle at 80% 10%,
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px
+    ),
+    radial-gradient(
+      circle at 50% 70%,
+      rgba(255, 255, 255, 0.1) 2px,
+      transparent 2px
+    ),
+    radial-gradient(
+      circle at 90% 90%,
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px
+    );
+  background-size: 100px 100px;
+  animation: sparkle 20s linear infinite;
+}
+
+/* 4. Animated Light Beams (for winners) */
+.light-beams {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+}
+.win-modal-container.winner .light-beams {
+  opacity: 1;
+}
+.light-beams .beam {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 400%;
+  background: linear-gradient(
+    to top,
+    transparent,
+    rgba(92, 255, 182, 0.5),
+    transparent
+  );
+  animation: rotate-beam 15s linear infinite;
+}
+.light-beams .beam:nth-child(2) {
+  animation-delay: -5s;
+}
+.light-beams .beam:nth-child(3) {
+  animation-delay: -10s;
+}
+
+/* 5. 3D/Neon Title */
+.win-modal-title {
+  font-family: "Black", sans-serif;
+  font-size: 5rem;
+  line-height: 1;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+.win-modal-title span {
+  display: inline-block;
+  transform: translateY(50px);
+  opacity: 0;
+  animation: drop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+/* Creates arched text effect on desktop */
+.win-modal-title span:nth-child(1) {
+  transform: rotate(-15deg);
+}
+.win-modal-title span:nth-child(2) {
+  transform: rotate(-10deg);
+}
+.win-modal-title span:nth-child(3) {
+  transform: rotate(-5deg);
+}
+.win-modal-title span:nth-child(4) {
+  transform: translateY(-5px);
+}
+.win-modal-title span:nth-child(5) {
+  transform: rotate(5deg);
+}
+.win-modal-title span:nth-child(6) {
+  transform: rotate(10deg);
+}
+.win-modal-title span:nth-child(7) {
+  transform: rotate(15deg);
+}
+.win-modal-title span:nth-child(8) {
+  transform: rotate(20deg);
+} /* For "VICTORY" */
+
+.winner-title {
+  color: #ffd700;
+  text-shadow: 0 0 5px #fff, 0 0 15px #ffd700, 0 0 30px #ffae00,
+    -2px 2px 2px rgba(0, 0, 0, 0.5);
+}
+.loser-title {
+  color: #b0b0c0;
+  text-shadow: -2px 2px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* 6. Subtitle & Reward Banner */
+.win-modal-subtitle {
+  font-family: "Bold", sans-serif;
+  font-size: 1.2rem;
+  color: #d8d2f5;
+  margin: 0 0 20px 0;
+  position: relative;
+  z-index: 2;
+}
+.win-modal-reward-banner {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  position: relative;
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.win-modal-amount {
+  font-family: "Black", sans-serif;
+  font-size: 2.5rem;
+}
+.winner-amount {
+  color: #5cffb6;
+}
+.loser-amount {
+  color: #e63946;
+}
+
+/* 7. Button and Keyframes */
+.win-modal-button {
+  min-width: 200px;
+  z-index: 2;
+}
+
+@keyframes modal-pop-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes sparkle {
+  0% {
+    background-position: 0 0, 0 0, 0 0, 0 0;
+  }
+  100% {
+    background-position: -200px -200px, -150px 150px, 100px -100px, -50px 50px;
+  }
+}
+@keyframes rotate-beam {
+  from {
+    transform: translateX(-50%) translateY(-50%) rotate(0deg);
+  }
+  to {
+    transform: translateX(-50%) translateY(-50%) rotate(360deg);
+  }
+}
+@keyframes drop-in {
+  to {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+}
+
+/* --- FIX FOR MOBILE --- */
+@media (max-width: 640px) {
+  .win-modal-container {
+    padding: 30px 20px;
+    width: calc(100% - 40px);
+  }
+
+  .win-modal-title {
+    font-size: 3rem; /* Reduce title size */
+    margin-bottom: 15px;
+  }
+
+  /* Reset the letter arching on mobile for readability */
+  .win-modal-title span {
+    transform: none !important;
+  }
+
+  .win-modal-subtitle {
+    font-size: 1rem;
+    margin-bottom: 15px;
+  }
+
+  .win-modal-amount {
+    font-size: 1.75rem;
+  }
+
+  .win-modal-reward-banner {
+    margin-bottom: 25px;
+  }
+}
