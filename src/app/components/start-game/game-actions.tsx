@@ -44,10 +44,7 @@ export default function GameActions() {
   // Otherwise, show the button to start matchmaking
   return (
     <span className="jsx-5f9af3a98e99b444 actions">
-      {/* Display error messages from the store if any */}
-      {errorMessage && (
-        <p style={{ color: "red", paddingBottom: "10px" }}>{errorMessage}</p>
-      )}
+      {" "}
       <button
         onClick={matchmake}
         disabled={isLoading}
@@ -55,9 +52,9 @@ export default function GameActions() {
       >
         <i className="jsx-bf1d798ec2f16818 playSmall" />{" "}
         <strong className="jsx-d0e8374e17477ac4">
-          {isLoading ? "SEARCHING..." : "START MATCHMAKING"}
-        </strong>
-      </button>
+          {isLoading ? "SEARCHING..." : "START MATCHMAKING"}{" "}
+        </strong>{" "}
+      </button>{" "}
     </span>
   );
 }

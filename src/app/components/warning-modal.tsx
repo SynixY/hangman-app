@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
-import useGameStore from "../stores/useGameStore";
+import { useGameStore } from "../stores/useGameStore";
 
 export default function WarningModal() {
-  const { isWarningModalOpen, setWarningModalOpen } = useGameStore();
+  const isWarningModalOpen = false;
   if (!isWarningModalOpen) {
     return <></>;
   }
@@ -20,12 +20,7 @@ export default function WarningModal() {
         </div>
         <span className="jsx-72a234951d07662">
           <button className="jsx-7a5051b5ea0cbf35 ">Sì</button>
-          <button
-            onClick={() => setWarningModalOpen(false)}
-            className="jsx-7a5051b5ea0cbf35 "
-          >
-            No
-          </button>
+          <button className="jsx-7a5051b5ea0cbf35 ">No</button>
         </span>
       </div>
     </div>

@@ -1,19 +1,16 @@
 "use client";
-import useModalStore from "@/app/stores/mainStore";
+
 import React from "react";
 
 export default function LangModal() {
-  const { isLangModalOpen, setLangModalOpen } = useModalStore();
+  const isLangModalOpen = false;
   if (!isLangModalOpen) {
     return <></>;
   }
   return (
     <div className="jsx-2835833729 background fade-enter-done">
       <div className="jsx-2835833729 it content">
-        <button
-          onClick={() => setLangModalOpen(false)}
-          className="jsx-f1ed09f139fd0ff4 close"
-        />
+        <button className="jsx-f1ed09f139fd0ff4 close" />
         <h2 className="jsx-585ea3472e396a52">LINGUE</h2>
         <div className="jsx-b32d58b376010328 list">
           <div className="jsx-3217538729 scroll over top">

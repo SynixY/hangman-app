@@ -1,15 +1,18 @@
 "use client";
 import React from "react";
 import { useGameStore } from "@/app/stores/useGameStore";
-
+import { useShallow } from "zustand/shallow";
 export default function PlayersList() {
-  const serverPlayers = useGameStore((state) => state.players);
-  const currentUser = useGameStore((state) => state.username);
+  const { serverPlayers, currentUser } = useGameStore(
+    useShallow((state) => ({
+      serverPlayers: state.players,
+      currentUser: state.username,
+    }))
+  );
   const maxPlayers = 4; // This could come from the store later
 
   // The list of players to display on screen.
-  const displayPlayers = [];
-
+  const displayPlayers: { username: string; isOwner: boolean }[] = [];
   // 1. Add the current user to the list first, if they exist.
   if (currentUser) {
     displayPlayers.push({ username: currentUser, isOwner: true });

@@ -11,6 +11,11 @@ type Player = {
   has_paid?: boolean;
 };
 
+type DisplayPlayer = {
+  username: string;
+  isOwner: boolean;
+};
+
 type Message = {
   username: string;
   message: string;
@@ -26,6 +31,7 @@ interface GameState {
   view: "home" | "lobby" | "game";
   isLoading: boolean;
   errorMessage: string;
+  isErrorModalOpen: boolean;
   isPaymentModalOpen: boolean;
   isCountdownModalOpen: boolean;
   isWinModalOpen: boolean;
@@ -53,15 +59,21 @@ interface GameState {
   setUsername: (username: string) => void;
   setDifficulty: (difficulty: "easy" | "hard") => void;
   setWinModalOpen: (isOpen: boolean) => void;
+  setCountdownModalOpen: (isOpen: boolean) => void;
+  setPaymentModalOpen: (isOpen: boolean) => void;
   submitGuess: (guess: string) => void;
   sendChatMessage: (message: string) => void;
   matchmake: () => Promise<void>;
+  setErrorMessage: (message: string) => void;
+  clearErrorMessage: () => void;
   connectSocket: () => void;
   resetGame: () => void;
   cancelMatchmaking: () => Promise<void>;
 }
 
-const persistOptions: PersistOptions<GameState> = {
+type PersistedState = Pick<GameState, "jwt" | "username">;
+
+const persistOptions: PersistOptions<GameState, PersistedState> = {
   name: "hangman-game-storage",
   partialize: (state) => ({ jwt: state.jwt, username: state.username }),
 
@@ -99,6 +111,7 @@ export const useGameStore = create<GameState>()(
       view: "home",
       isLoading: false,
       errorMessage: "",
+      isErrorModalOpen: false,
       isPaymentModalOpen: false,
       isCountdownModalOpen: false,
       isWinModalOpen: false,
@@ -127,6 +140,10 @@ export const useGameStore = create<GameState>()(
       setDifficulty: (difficulty) => set({ difficulty }),
       setWinModalOpen: (isOpen) => set({ isWinModalOpen: isOpen }),
 
+      setErrorMessage: (message) =>
+        set({ errorMessage: message, isErrorModalOpen: true }),
+      clearErrorMessage: () =>
+        set({ errorMessage: "", isErrorModalOpen: false }),
       // Centralized reset action for all session cleanup
       resetGame: () => {
         get().socket?.disconnect();
@@ -148,23 +165,29 @@ export const useGameStore = create<GameState>()(
       },
 
       cancelMatchmaking: async () => {
-        const { jwt, resetGame } = get();
+        const { jwt, resetGame, setErrorMessage } = get();
         if (!jwt) return;
 
         set({ isLoading: true });
         try {
-          await fetch(`${BACKEND_URL}/cancel_matchmaking`, {
+          const response = await fetch(`${BACKEND_URL}/cancel_matchmaking`, {
             method: "POST",
             headers: { Authorization: `Bearer ${jwt}` },
           });
-          resetGame(); // On success, perform a full reset
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.detail || "Failed to cancel matchmaking.");
+          }
+          resetGame();
         } catch (error: any) {
-          set({ errorMessage: error.message, isLoading: false });
+          setErrorMessage(error.message);
+        } finally {
+          set({ isLoading: false });
         }
       },
 
       matchmake: async () => {
-        const { username, difficulty } = get();
+        const { username, difficulty, setErrorMessage } = get();
         set({ isLoading: true, errorMessage: "" });
         try {
           const response = await fetch(`${BACKEND_URL}/matchmake`, {
@@ -173,19 +196,20 @@ export const useGameStore = create<GameState>()(
             body: JSON.stringify({ username, difficulty }),
           });
           const data = await response.json();
-          if (!response.ok)
+          if (!response.ok) {
             throw new Error(data.detail || "Matchmaking failed.");
+          }
 
-          // Set isLoading to false here, as the initial search is complete.
           set({
             jwt: data.jwt,
             players: [{ username }],
-            isLoading: false, // <-- FIX: Enable cancel button
+            isLoading: false,
           });
 
           get().connectSocket();
         } catch (error: any) {
-          set({ errorMessage: error.message, isLoading: false });
+          setErrorMessage(error.message);
+          set({ isLoading: false });
         }
       },
 

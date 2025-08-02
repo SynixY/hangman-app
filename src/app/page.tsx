@@ -6,15 +6,25 @@ import PaymentModal from "./components/payment-modal";
 import WinModal from "./components/win-modal";
 import Countdown from "./components/start-game/countdown";
 import Game from "./components/handman/game";
-import { useEffect } from "react";
+import ErrorModal from "./components/error";
+import { useShallow } from "zustand/shallow";
 
 export default function HomePage() {
   const view = useGameStore((state) => state.view);
-  const isPaymentModalOpen = useGameStore((state) => state.isPaymentModalOpen);
-  const isCountdownModalOpen = useGameStore(
-    (state) => state.isCountdownModalOpen
+
+  const {
+    isWinModalOpen,
+    isErrorModalOpen,
+    isPaymentModalOpen,
+    isCountdownModalOpen,
+  } = useGameStore(
+    useShallow((state) => ({
+      isWinModalOpen: state.isWinModalOpen,
+      isPaymentModalOpen: state.isPaymentModalOpen,
+      isCountdownModalOpen: state.isCountdownModalOpen,
+      isErrorModalOpen: state.isErrorModalOpen,
+    }))
   );
-  const isWinModalOpen = useGameStore((state) => state.isWinModalOpen);
 
   // This function will render the correct component based on the current view state
   const renderView = () => {
@@ -34,7 +44,8 @@ export default function HomePage() {
       {/* Modals can still be here if they are global */}{" "}
       {isPaymentModalOpen && <PaymentModal />}{" "}
       {isCountdownModalOpen && <Countdown />} {/* <LangModal /> */}{" "}
-      {/* <WarningModal /> */} {isWinModalOpen && <WinModal />} {renderView()}{" "}
+      {/* <WarningModal /> */} {isWinModalOpen && <WinModal />}{" "}
+      {isErrorModalOpen && <ErrorModal />} {renderView()}{" "}
     </>
   );
 }

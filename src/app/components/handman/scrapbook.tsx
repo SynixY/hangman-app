@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import ChatMessage from "./chat-message";
-import Hangman from "./hangman";
+import Hangman from "./Hangman";
 import GameInput from "./GameInput";
 import { useGameStore } from "@/app/stores/useGameStore";
 import { useShallow } from "zustand/react/shallow";
