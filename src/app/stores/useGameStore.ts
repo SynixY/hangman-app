@@ -4,7 +4,7 @@ import { persist, PersistOptions } from "zustand/middleware";
 import { io, Socket } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 
-const BACKEND_URL = "https://168.100.11.2040:8000";
+const BACKEND_URL = "http://168.100.11.204:8000";
 
 type Player = {
   username: string;
