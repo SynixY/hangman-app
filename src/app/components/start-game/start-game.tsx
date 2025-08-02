@@ -4,8 +4,10 @@ import PlayersList from "./players-list";
 import GameSettings from "./game-settings";
 import { useGameStore } from "@/app/stores/useGameStore";
 import { useShallow } from "zustand/react/shallow";
+import useIsMobile from "@/app/hooks/useIsMobile";
 
 export default function StartGame() {
+  const isMobile = useIsMobile();
   const { setView, jwt, cancelMatchmaking } = useGameStore(
     useShallow((state) => ({
       setView: state.setView,
@@ -13,15 +15,6 @@ export default function StartGame() {
       cancelMatchmaking: state.cancelMatchmaking,
     }))
   );
-
-  useEffect(() => {
-    const originalBackground = document.body.style.backgroundImage;
-    document.body.style.backgroundImage =
-      "linear-gradient(215deg, rgb(116, 84, 249) 0%, rgb(115, 17, 176) 85%)";
-    return () => {
-      document.body.style.backgroundImage = originalBackground;
-    };
-  }, []);
 
   const handleBackClick = async () => {
     if (jwt) {
@@ -34,24 +27,29 @@ export default function StartGame() {
 
   return (
     <>
-      <div className="jsx-b6582d438744e10b side">
+      {/*<div className="jsx-b6582d438744e10b side">
         <div id="garticphone-com_160x600" className="jsx-b6582d438744e10b" />
-      </div>
+      </div>*/}
       <div id="content" className="jsx-c2cb53106fc23b05 jsx-3140246774">
         <div
           className="jsx-c2cb53106fc23b05 jsx-3140246774 screen fade-enter-done"
-          style={{ transform: "scale(0.862609)" }}
+          style={{ transform: "scale(1.0)" }}
         >
           <div className="jsx-5f9af3a98e99b444 lobby">
-            <div
-              className="jsx-edb3820d2b555758 back"
-              onClick={handleBackClick}
-            >
-              <strong className="jsx-edb3820d2b555758">BACK</strong>
-            </div>
-            <figure className="jsx-c943d1a75f1e99b4" />
+            {!isMobile && (
+              <>
+                <div
+                  className="jsx-edb3820d2b555758 back"
+                  onClick={handleBackClick}
+                >
+                  <strong className="jsx-edb3820d2b555758">BACK</strong>
+                </div>
+                <figure className="jsx-c943d1a75f1e99b4" />
+              </>
+            )}
             <div className="jsx-5f9af3a98e99b444 center">
               <PlayersList />
+              <div style={{ marginTop: "15px" }}></div>
               <GameSettings />
             </div>
           </div>

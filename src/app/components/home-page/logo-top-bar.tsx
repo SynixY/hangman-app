@@ -20,7 +20,7 @@ function LogoTopBar() {
           <Logo></Logo>
         </div>
       </span>
-      <p className="jsx-d0e8374e17477ac4">Telefono Senza Fili</p>
+      <p className="jsx-d0e8374e17477ac4">Play to Earn</p>
     </div>
   );
 }

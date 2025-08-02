@@ -6,12 +6,39 @@ export default function MiniTutorialSteps() {
   useEffect(() => {
     setInterval(() => {
       setStep((s) => (s + 1 > 5 ? 0 : s + 1));
-    }, 5000);
+    }, 100000);
   }, []);
+
+  const tutoSteps: { title: string; text: string }[] = [
+    {
+      title: "1. A VOCE È MEGLIO",
+      text: "Invita gli amici in una chat vocale (es. Discord, Zoom)",
+    },
+    {
+      title: "2. ORA SCRIVI",
+      text: "Ogni partecipante scrive una frase assurda",
+    },
+    {
+      title: "3. ORA DISEGNA",
+      text: "Ricevi una delle frasi bizzarre e ora prova a farne un disegno",
+    },
+    {
+      title: "2. ORA SCRIVI",
+      text: "Ogni partecipante scrive una frase assurda",
+    },
+    {
+      title: "2. ORA SCRIVI",
+      text: "Ogni partecipante scrive una frase assurda",
+    },
+    {
+      title: "2. ORA SCRIVI",
+      text: "Ogni partecipante scrive una frase assurda",
+    },
+  ];
   return (
     <div className={`jsx-171f7a710ec7f2d8 tutorial step${step}`}>
       <div className="jsx-171f7a710ec7f2d8">
-        <h3 className="jsx-171f7a710ec7f2d8">COME GIOCARE</h3>
+        <h3 className="jsx-171f7a710ec7f2d8">HOW TO PLAY</h3>
         <div className="jsx-171f7a710ec7f2d8 steps">
           <div className="jsx-171f7a710ec7f2d8">
             <figure className="jsx-171f7a710ec7f2d8">
@@ -321,10 +348,8 @@ export default function MiniTutorialSteps() {
               </div>
             </figure>
             <span className="jsx-171f7a710ec7f2d8">
-              <h4 className="jsx-171f7a710ec7f2d8">1. A VOCE È MEGLIO</h4>
-              <p className="jsx-171f7a710ec7f2d8">
-                Invita gli amici in una chat vocale (es. Discord, Zoom)
-              </p>
+              <h4 className="jsx-171f7a710ec7f2d8">{tutoSteps[0].title}</h4>
+              <p className="jsx-171f7a710ec7f2d8">{tutoSteps[0].text}</p>
             </span>
           </div>
           <div className="jsx-171f7a710ec7f2d8">
@@ -540,10 +565,8 @@ export default function MiniTutorialSteps() {
               </div>
             </figure>
             <span className="jsx-171f7a710ec7f2d8">
-              <h4 className="jsx-171f7a710ec7f2d8">2. ORA SCRIVI</h4>
-              <p className="jsx-171f7a710ec7f2d8">
-                Ogni partecipante scrive una frase assurda
-              </p>
+              <h4 className="jsx-171f7a710ec7f2d8">{tutoSteps[1].title}</h4>
+              <p className="jsx-171f7a710ec7f2d8">{tutoSteps[1].text}</p>
             </span>
           </div>
           <div className="jsx-171f7a710ec7f2d8">
@@ -748,10 +771,8 @@ export default function MiniTutorialSteps() {
               </div>
             </figure>
             <span className="jsx-171f7a710ec7f2d8">
-              <h4 className="jsx-171f7a710ec7f2d8">3. ORA DISEGNA</h4>
-              <p className="jsx-171f7a710ec7f2d8">
-                Ricevi una delle frasi bizzarre e ora prova a farne un disegno
-              </p>
+              <h4 className="jsx-171f7a710ec7f2d8"> {tutoSteps[2].title}</h4>
+              <p className="jsx-171f7a710ec7f2d8">{tutoSteps[2].text}</p>
             </span>
           </div>
           <div className="jsx-171f7a710ec7f2d8">
@@ -976,10 +997,8 @@ export default function MiniTutorialSteps() {
               </div>
             </figure>
             <span className="jsx-171f7a710ec7f2d8">
-              <h4 className="jsx-171f7a710ec7f2d8">4. CHE ROBA È QUESTA?</h4>
-              <p className="jsx-171f7a710ec7f2d8">
-                Cerca di descrivere uno dei disegni senza senso
-              </p>
+              <h4 className="jsx-171f7a710ec7f2d8">{tutoSteps[3].title}</h4>
+              <p className="jsx-171f7a710ec7f2d8">{tutoSteps[3].text}</p>
             </span>
           </div>
           <div className="jsx-171f7a710ec7f2d8">
@@ -1278,12 +1297,8 @@ export default function MiniTutorialSteps() {
               </div>
             </figure>
             <span className="jsx-171f7a710ec7f2d8">
-              <h4 className="jsx-171f7a710ec7f2d8">
-                5. GUARDA CHE ROBA È VENUTA FUORI
-              </h4>
-              <p className="jsx-171f7a710ec7f2d8">
-                Guarda che cosa ridicola è venuta fuori nel telefono senza fili
-              </p>
+              <h4 className="jsx-171f7a710ec7f2d8">{tutoSteps[4].title}</h4>
+              <p className="jsx-171f7a710ec7f2d8">{tutoSteps[4].text}</p>
             </span>
           </div>
           <div className="jsx-171f7a710ec7f2d8">
@@ -1594,16 +1609,14 @@ export default function MiniTutorialSteps() {
               </div>
             </figure>
             <span className="jsx-171f7a710ec7f2d8">
-              <h4 className="jsx-171f7a710ec7f2d8">6. SEI DA SOLO?</h4>
-              <p className="jsx-171f7a710ec7f2d8">
-                Trova migliaia di garticmaniaci nel nostro server di Discord!
-              </p>
+              <h4 className="jsx-171f7a710ec7f2d8">{tutoSteps[5].title}</h4>
+              <p className="jsx-171f7a710ec7f2d8">{tutoSteps[5].text}</p>
               <a
                 href="https://discord.gg/gartic"
                 target="_blank"
                 className="jsx-171f7a710ec7f2d8"
               >
-                ACCEDERE A DISCORD
+                JOIN OUR GROUP
               </a>
             </span>
           </div>

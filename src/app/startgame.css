@@ -1108,13 +1108,13 @@ div.jsx-edb3820d2b555758:after {
 figure.jsx-c943d1a75f1e99b4 {
   width: 160px;
   height: 92px;
-  background-image: url(/images/phone.svg);
+  background-image: url(/images/logo.png);
   background-position: center;
   background-repeat: no-repeat;
   -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
+  -moz-background-size: contain;
+  -o-background-size: contain;
+  background-size: contain;
 }
 @media (max-width: 640px) {
   figure.jsx-c943d1a75f1e99b4 {
@@ -4291,7 +4291,7 @@ figure.jsx-1668173960 {
   -moz-background-size: contain;
   -o-background-size: contain;
   background-size: contain;
-  background-image: url(/images/ic_freestyle.svg);
+  background-image: url(/images/easyMode.png);
   -webkit-transition-property: opacity, max-height;
   -moz-transition-timing-function: opacity, max-height;
   -o-transition-timing-function: opacity, max-height;
@@ -5064,7 +5064,7 @@ figure.jsx-206874726 {
   -moz-background-size: contain;
   -o-background-size: contain;
   background-size: contain;
-  background-image: url(/images/ic_knockoff.svg);
+  background-image: url(/images/hardMode.png);
   -webkit-transition-property: opacity, max-height;
   -moz-transition-timing-function: opacity, max-height;
   -o-transition-timing-function: opacity, max-height;

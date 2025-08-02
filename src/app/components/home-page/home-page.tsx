@@ -13,7 +13,7 @@ function Home() {
       </div>
       <div id="content" className="jsx-c2cb53106fc23b05 jsx-3140246774">
         <div
-          style={{ transform: "scale(0.862609)" }}
+          style={{ transform: "scale(1.0)" }}
           className="jsx-c2cb53106fc23b05 jsx-3140246774 screen"
         >
           <div className="jsx-d0e8374e17477ac4 start">

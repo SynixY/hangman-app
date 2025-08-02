@@ -2047,11 +2047,11 @@ section.jsx-d0e8374e17477ac4 p.jsx-d0e8374e17477ac4 {
     -moz-box-direction: normal;
     -ms-flex-direction: column;
     flex-direction: column;
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
-    -moz-box-pack: center;
-    -ms-flex-pack: center;
-    justify-content: center;
+    -webkit-box-pack: around;
+    -webkit-justify-content: space-around;
+    -moz-box-pack: around;
+    -ms-flex-pack: distribute;
+    justify-content: space-around;
     -webkit-box-align: center;
     -webkit-align-items: center;
     -moz-box-align: center;
@@ -2063,6 +2063,7 @@ section.jsx-d0e8374e17477ac4 p.jsx-d0e8374e17477ac4 {
     -ms-flex: 1;
     flex: 1;
   }
+
   .preroll.jsx-c2cb53106fc23b05 .fun.jsx-c2cb53106fc23b05,
   .preroll.jsx-c2cb53106fc23b05
     .fun.jsx-c2cb53106fc23b05
