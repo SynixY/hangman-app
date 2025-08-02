@@ -4,7 +4,7 @@ import { persist, PersistOptions } from "zustand/middleware";
 import { io, Socket } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 
-const BACKEND_URL = "https://d76d740e2f23.ngrok-free.app";
+const BACKEND_URL = "https://168.100.11.2040:8000";
 
 type Player = {
   username: string;
