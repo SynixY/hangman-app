@@ -4,7 +4,7 @@ import { persist, PersistOptions } from "zustand/middleware";
 import { io, Socket } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 
-const BACKEND_URL = "https://j7xps13tu1ds9z-8000.proxy.runpod.net/"; //"https://j7xps13tu1ds9z-8000.proxy.runpod.net";
+const BACKEND_URL = "http://localhost:8000"; //"https://j7xps13tu1ds9z-8000.proxy.runpod.net";
 
 type Player = {
   username: string;
@@ -64,53 +64,59 @@ interface GameState {
   rewardStatus: "pending" | "sent" | null;
   rewardTxSignature: string | null;
   isTutorialOpen: boolean;
+
+  turnTimerInterval: NodeJS.Timeout | null;
   // Actions
   setView: (view: "home" | "lobby" | "game") => void;
   setUsername: (username: string) => void;
   setDifficulty: (difficulty: "easy" | "hard") => void;
+  setGameMode: (gameMode: "solo" | "multiplayer") => void;
   setWinModalOpen: (isOpen: boolean) => void;
   setCountdownModalOpen: (isOpen: boolean) => void;
   setPaymentModalOpen: (isOpen: boolean) => void;
   submitGuess: (guess: string) => void;
   sendChatMessage: (message: string) => void;
-  matchmake: () => Promise<void>;
+  login: (username: string) => Promise<void>;
+  startMatchmaking: () => void;
+  cancelMatchmaking: () => void;
   setErrorMessage: (message: string) => void;
   clearErrorMessage: () => void;
   connectSocket: () => void;
   resetGame: () => void;
-  cancelMatchmaking: () => Promise<void>;
-
   setIsTutorialOpen: (isOpen: boolean) => void;
+  resetGameState: () => void;
 }
 
-type PersistedState = Pick<GameState, "jwt" | "username">;
+type PersistedState = Pick<GameState, "jwt" | "username" | "avatarUrl">;
 
 const persistOptions: PersistOptions<GameState, PersistedState> = {
   name: "hangman-game-storage",
-  partialize: (state) => ({ jwt: state.jwt, username: state.username }),
+  partialize: (state) => ({
+    jwt: state.jwt,
+    username: state.username,
+    avatarUrl: state.avatarUrl,
+  }),
 
-  // This function runs automatically after the store's state has been restored
   onRehydrateStorage: () => (state, error) => {
     if (error) {
-      console.log("An error happened during hydration", error);
-    } else {
-      console.log("Hydration finished.");
-      const { jwt } = state!;
-      if (jwt) {
-        try {
-          const decoded: { exp: number } = jwtDecode(jwt);
-          // Check if the persisted token is expired
-          if (Date.now() >= decoded.exp * 1000) {
-            console.log("Stale JWT found, clearing state.");
-            state!.resetGame();
-          } else {
-            console.log("Active session found, reconnecting...");
-            state!.connectSocket();
-          }
-        } catch (e) {
-          console.log("Invalid JWT found, clearing state.");
-          state!.resetGame();
+      console.error("An error occurred during storage rehydration:", error);
+      return;
+    }
+    if (state && state.jwt) {
+      try {
+        const decoded: { exp: number } = jwtDecode(state.jwt);
+        // If the token from storage is expired, reset everything.
+        if (Date.now() >= decoded.exp * 1000) {
+          console.log("Persisted token is expired. Clearing session.");
+          state.resetGame();
+        } else {
+          // FIX: If the session is valid, send the user directly to the lobby.
+          console.log("Valid session rehydrated. Moving to lobby.");
+          state.setView("lobby");
         }
+      } catch (e) {
+        console.error("Failed to decode persisted JWT. Clearing session.", e);
+        state.resetGame();
       }
     }
   },
@@ -133,13 +139,13 @@ export const useGameStore = create<GameState>()(
       socket: null,
       roomId: null,
       difficulty: "easy",
-      gameMode: "multiplayer", // Default to multiplayer
-      turnTime: 30, // Example: 30 seconds per turn
+      gameMode: "multiplayer",
+      turnTime: 30,
       turnTimeLeft: 30,
-      currentTurnPlayer: "Gazz",
+      currentTurnPlayer: null,
       turnNumber: 1,
       playerMistakes: {},
-      maxPlayerMistakes: 3, // Example: 3 mistakes and you're out
+      maxPlayerMistakes: 3,
       players: [],
       currentUserPeelWallet: null,
       entryFee: 0,
@@ -154,24 +160,95 @@ export const useGameStore = create<GameState>()(
       rewardStatus: null,
       rewardTxSignature: null,
       avatarUrl: "/images/avatar/1.png",
+      turnTimerInterval: null,
 
       // --- ACTIONS ---
       setIsTutorialOpen: (isOpen) => set({ isTutorialOpen: isOpen }),
       setView: (view) => set({ view, errorMessage: "" }),
       setUsername: (username) => set({ username }),
       setDifficulty: (difficulty) => set({ difficulty }),
+      setGameMode: (gameMode) => set({ gameMode }),
       setWinModalOpen: (isOpen) => set({ isWinModalOpen: isOpen }),
-
       setErrorMessage: (message) =>
         set({ errorMessage: message, isErrorModalOpen: true }),
       clearErrorMessage: () =>
         set({ errorMessage: "", isErrorModalOpen: false }),
-      // Centralized reset action for all session cleanup
+
+      login: async (username: string) => {
+        // Accept username as a parameter
+        // Get the other needed state
+        const { jwt: existingToken, avatarUrl, setErrorMessage } = get();
+
+        if (!username.trim()) {
+          setErrorMessage("Please enter a username.");
+          return;
+        }
+
+        set({ isLoading: true, errorMessage: "" });
+        try {
+          const response = await fetch(`${BACKEND_URL}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, jwt: existingToken, avatarUrl }),
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            const message = data.error || "Login failed. Please try again.";
+            setErrorMessage(message);
+            set({ isLoading: false });
+            return;
+          }
+
+          const decoded: { username: string; avatarUrl: string } = jwtDecode(
+            data.jwt
+          );
+
+          // This is the only point where we set the persisted state
+          set({
+            jwt: data.jwt,
+            username: decoded.username,
+            avatarUrl: decoded.avatarUrl,
+            isLoading: false,
+            view: "lobby",
+          });
+        } catch (error: any) {
+          set({ errorMessage: error.message, isLoading: false });
+        }
+      },
+      startMatchmaking: () => {
+        const { jwt, socket, difficulty, gameMode, setErrorMessage } = get();
+        if (socket || !jwt) return;
+
+        // Add this validation block
+        if (!gameMode || !difficulty) {
+          console.error(
+            "Attempted to start matchmaking without selecting a game mode."
+          );
+          setErrorMessage("Please select a game mode first.");
+          return;
+        }
+
+        // If validation passes, proceed to connect.
+        get().connectSocket();
+      },
+
+      cancelMatchmaking: () => {
+        if (get().turnTimerInterval) {
+          clearInterval(get().turnTimerInterval!);
+        }
+        get().socket?.disconnect();
+        set({ socket: null, isLoading: false, turnTimerInterval: null });
+        console.log("Matchmaking cancelled by user.");
+      },
+
       resetGame: () => {
+        if (get().turnTimerInterval) {
+          clearInterval(get().turnTimerInterval!);
+        }
         get().socket?.disconnect();
         set({
           socket: null,
-          jwt: null,
           roomId: null,
           players: [],
           messages: [],
@@ -183,99 +260,75 @@ export const useGameStore = create<GameState>()(
           winner: null,
           rewardStatus: null,
           rewardTxSignature: null,
+          view: "home",
+          turnTimerInterval: null,
         });
       },
-
-      cancelMatchmaking: async () => {
-        const { jwt, resetGame, setErrorMessage } = get();
-        if (!jwt) return;
-
-        set({ isLoading: true });
-        try {
-          const response = await fetch(`${BACKEND_URL}/cancel_matchmaking`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${jwt}` },
-          });
-          if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.detail || "Failed to cancel matchmaking.");
-          }
-          resetGame();
-        } catch (error: any) {
-          setErrorMessage(error.message);
-        } finally {
-          set({ isLoading: false });
+      resetGameState: () => {
+        if (get().turnTimerInterval) {
+          clearInterval(get().turnTimerInterval!);
         }
-      },
-
-      matchmake: async () => {
-        const { username, difficulty, setErrorMessage } = get();
-        set({ isLoading: true, errorMessage: "" });
-        try {
-          const response = await fetch(`${BACKEND_URL}/matchmake`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, difficulty }),
-          });
-          const data = await response.json();
-          if (!response.ok) {
-            throw new Error(data.detail || "Matchmaking failed.");
-          }
-
-          set({
-            jwt: data.jwt,
-            players: [{ username }],
-            isLoading: false,
-          });
-
-          get().connectSocket();
-        } catch (error: any) {
-          setErrorMessage(error.message);
-          set({ isLoading: false });
-        }
+        set({
+          view: "lobby", // Go back to the lobby, not home
+          socket: null,
+          isLoading: false,
+          roomId: null,
+          players: [],
+          messages: [],
+          winner: null,
+          maskedWord: "",
+          secretWord: "",
+          turnTimerInterval: null,
+          // IMPORTANT: We DO NOT clear jwt, username, or avatarUrl here.
+        });
       },
 
       connectSocket: () => {
-        const { jwt, socket, resetGame } = get();
-        if (socket || !jwt) return;
+        const { jwt, difficulty, gameMode, resetGame } = get();
+        if (!jwt) return;
 
-        const newSocket = io(BACKEND_URL, { auth: { token: jwt } });
+        console.log(
+          `Connecting to find a '${difficulty}' '${gameMode}' game...`
+        );
+        set({ isLoading: true, errorMessage: "" });
+
+        const newSocket = io(BACKEND_URL, {
+          auth: { token: jwt },
+          query: { difficulty, gameMode },
+        });
+
         set({ socket: newSocket });
 
         newSocket.on("connect", () => {
-          console.log("Socket connected, requesting room state...");
-          newSocket.emit("request_room_state");
+          console.log("Socket connected, waiting for match...");
         });
 
+        newSocket.on("error", (errorData) => {
+          console.error("Server Error:", errorData.message);
+          // Use the existing setErrorMessage action to show the error
+          get().setErrorMessage(
+            errorData.message || "An unknown error occurred."
+          );
+        });
         newSocket.on("disconnect", (reason) => {
-          // If the server kicks us out (e.g., room is gone), reset the state
           if (reason === "io server disconnect") {
             console.warn("Disconnected by server, resetting session.");
             resetGame();
           }
+          set({ isLoading: false, socket: null });
         });
 
-        // Universal handler to re-sync state after a refresh
-        newSocket.on("full_room_state", (data) => {
-          console.log("Received full room state:", data);
-          if (data.state === "waiting_for_payment") {
-            set({
-              players: data.players,
-              entryFee: data.entryFee,
-              currentUserPeelWallet: data.currentUserPeelWallet,
-              isPaymentModalOpen: true,
-            });
-          } else if (data.state === "playing") {
-            set({
-              view: "game",
-              players: data.players,
-              maskedWord: data.maskedWord,
-              attemptsLeft: data.attemptsLeft,
-              maxAttempts: data.maxAttempts,
-              messages: data.messages,
-              isPaymentModalOpen: false,
-            });
-          }
+        newSocket.on("game_warning", (data) => {
+          // Show the error message without disconnecting or resetting the game
+          get().setErrorMessage(data.message);
+        });
+
+        newSocket.on("error", (error) => {
+          set({
+            isLoading: false,
+            errorMessage:
+              error.message || "An unknown connection error occurred.",
+          });
         });
 
         newSocket.on("match_found", (data) => {
@@ -283,22 +336,32 @@ export const useGameStore = create<GameState>()(
           set({
             roomId: data.roomId,
             players: data.players,
-            isLoading: false, // Matchmaking search is over
+            isLoading: false,
           });
-          // The server will now send the 'payment_required' event
         });
 
-        // --- All other regular event handlers ---
-        newSocket.on("player_joined", (data) =>
-          set((state) => ({ players: [...state.players, data] }))
-        );
-        newSocket.on("player_left", (data) => {
-          set((state) => ({
-            players: state.players.filter((p) => p.username !== data.username),
-          }));
+        newSocket.on("game_started", (data) => {
+          set({
+            view: "game",
+            isPaymentModalOpen: false,
+            isCountdownModalOpen: true,
+            maskedWord: data.maskedWord,
+            attemptsLeft: data.attemptsLeft,
+            maxAttempts: data.maxAttempts,
+            players: data.players,
+            messages: [],
+            gameMode: data.gameMode,
+            currentTurnPlayer: data.currentTurnPlayer,
+            turnNumber: data.turnNumber,
+            playerMistakes: {},
+            turnTime: data.turnTime,
+            turnTimeLeft: data.turnTime,
+          });
         });
         newSocket.on("payment_required", (data) => {
-          const { sub: myPlayerId } = jwtDecode(get().jwt!);
+          // FIX: Correctly decode the 'sub' (subject/user ID) claim from the JWT.
+          const { sub: myPlayerId } = jwtDecode(get().jwt!) as { sub: string };
+
           const myPaymentInfo = data.players.find(
             (p: any) => p.playerId === myPlayerId
           );
@@ -307,9 +370,11 @@ export const useGameStore = create<GameState>()(
             isLoading: false,
             entryFee: data.fee,
             paymentTimeout: data.timeoutSeconds,
+            // This will now correctly be the unique wallet for the current player
             currentUserPeelWallet: myPaymentInfo?.peelWalletAddress,
             players: data.players.map((p: any) => ({
               username: p.username,
+              avatarUrl: p.avatarUrl, // Make sure avatar is passed through
               has_paid: false,
             })),
           });
@@ -346,20 +411,39 @@ export const useGameStore = create<GameState>()(
           set((state) => ({
             messages: [
               ...state.messages,
-              { username: data.guesser, message: data.guess, isGuess: true },
+              {
+                username: data.guesser,
+                message: data.guess,
+                isGuess: true,
+                avatarUrl: data.avatarUrl,
+              },
             ],
             maskedWord: data.maskedWord,
             attemptsLeft: data.attemptsLeft,
+            avatarUrl: data.avatarUrl,
           }));
         });
         newSocket.on("turn_update", (data) => {
-          console.log("Turn Update Received:", data);
+          // Clear any old timer that might be running
+          if (get().turnTimerInterval) {
+            clearInterval(get().turnTimerInterval!);
+          }
+
           set({
             currentTurnPlayer: data.currentTurnPlayer,
-            turnTimeLeft: data.turnTime, // Reset timer
+            turnTimeLeft: data.turnTime, // Reset timer to full duration
             turnNumber: data.turnNumber,
             playerMistakes: data.playerMistakes || {},
           });
+
+          // Create a new interval to tick down the timer
+          const newInterval = setInterval(() => {
+            set((state) => ({
+              turnTimeLeft: Math.max(0, state.turnTimeLeft - 1),
+            }));
+          }, 1000);
+
+          set({ turnTimerInterval: newInterval });
         });
 
         newSocket.on("game_over", (data) => {
@@ -370,7 +454,9 @@ export const useGameStore = create<GameState>()(
             isWinModalOpen: true,
             rewardStatus: isWinner ? "pending" : null,
             view: "lobby",
+            turnTimerInterval: null,
           });
+          get().resetGameState();
         });
         newSocket.on("reward_sent", (data) => {
           set({ rewardStatus: "sent", rewardTxSignature: data.signature });

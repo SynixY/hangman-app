@@ -3,10 +3,16 @@ import React, { useState, useEffect } from "react";
 import Scrapbook from "./scrapbook";
 import Players from "./players";
 import { useGameStore } from "@/app/stores/useGameStore";
+import { useShallow } from "zustand/shallow";
 
 export default function Game() {
   const [isMobile, setIsMobile] = useState(false);
-  const setView = useGameStore((state) => state.setView);
+  const { setView, setErrorMessage } = useGameStore(
+    useShallow((state) => ({
+      setView: state.setView,
+      setErrorMessage: state.setErrorMessage,
+    }))
+  );
 
   useEffect(() => {
     // Store the original background style
@@ -38,6 +44,11 @@ export default function Game() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const handleExitClick = () => {
+    // Instead of changing the view, show an error.
+    setErrorMessage("You must forfeit the game to quit. (Feature coming soon)");
+  };
+
   return (
     <>
       <div
@@ -55,7 +66,7 @@ export default function Game() {
                 {" "}
                 <div
                   className="jsx-edb3820d2b555758 exit"
-                  onClick={() => setView("home")}
+                  onClick={handleExitClick}
                 >
                   <strong className="jsx-edb3820d2b555758">HOME PAGE</strong>
                 </div>
