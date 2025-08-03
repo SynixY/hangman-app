@@ -133,16 +133,14 @@ export default function CustomGame() {
             </SettingItem>
           ))}
 
-          <hr className="jsx-ff9a91141b223811" />
-
           <div className="jsx-ff9a91141b223811 estimatedTime">
             <span className="jsx-ff9a91141b223811">
-              <p className="jsx-ff9a91141b223811">DURATA STIMATA: 1 MINUTO</p>
+              <p className="jsx-ff9a91141b223811">CUSTOM SETTINGS</p>
             </span>
           </div>
 
           <div className="jsx-ff9a91141b223811 copy">
-            <span className="jsx-ff9a91141b223811">
+            {/*<span className="jsx-ff9a91141b223811">
               <h5 className="jsx-ff9a91141b223811">
                 IMPOSTAZIONI PARTITA
                 <i className="jsx-ff9a91141b223811">
@@ -160,7 +158,7 @@ export default function CustomGame() {
                 <strong className="jsx-ff9a91141b223811">COPIA</strong>
               </button>
             </span>
-            <span className="jsx-ff9a91141b223811">
+           <span className="jsx-ff9a91141b223811">
               <h5 className="jsx-ff9a91141b223811">
                 INVITO INDIVIDUALE
                 <i className="jsx-ff9a91141b223811">
@@ -177,7 +175,7 @@ export default function CustomGame() {
                 <i className="jsx-bf1d798ec2f16818 invite"></i>
                 <strong className="jsx-ff9a91141b223811">CREA</strong>
               </button>
-            </span>
+            </span>*/}
           </div>
         </div>
       </div>

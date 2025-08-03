@@ -4,7 +4,7 @@ import { persist, PersistOptions } from "zustand/middleware";
 import { io, Socket } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 
-const BACKEND_URL = "http://localhost:8000"; //"https://j7xps13tu1ds9z-8000.proxy.runpod.net";
+const BACKEND_URL = "https://9yfbbh3enhk8ll-8000.proxy.runpod.net/"; //"http://localhost:8000 ";
 
 type Player = {
   username: string;
@@ -447,6 +447,19 @@ export const useGameStore = create<GameState>()(
         });
 
         newSocket.on("game_over", (data) => {
+          if (data.reason == "Payment timeout") {
+            get().setErrorMessage(
+              "Payment timeout, you will get refunded automatically"
+            );
+            set({
+              view: "lobby",
+              turnTimerInterval: null,
+              isPaymentModalOpen: false,
+              currentUserPeelWallet: null,
+              players: [],
+            });
+            return;
+          }
           const isWinner = data.winner?.username === get().username;
           set({
             winner: data.winner,

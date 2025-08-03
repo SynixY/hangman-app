@@ -68,6 +68,21 @@ const PlayerItem: React.FC<PlayerItemProps> = ({
       <div className="jsx-3239482990 avatar">
         <span className="jsx-3239482990" style={avatarStyle} />
         <i className="jsx-3239482990" />
+
+        {statusIndicatorColor && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "-5px",
+              right: "-5px",
+              width: "14px",
+              height: "14px",
+              backgroundColor: statusIndicatorColor,
+              borderRadius: "50%",
+              border: "2px solid white",
+            }}
+          />
+        )}
       </div>
 
       {viewMode === "full" && (
@@ -87,21 +102,6 @@ const PlayerItem: React.FC<PlayerItemProps> = ({
             <figure className="jsx-e5240cdf0a94de60 jsx-7347205 owner" />
           )}
         </>
-      )}
-
-      {statusIndicatorColor && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: 2,
-            right: 2,
-            width: "14px",
-            height: "14px",
-            backgroundColor: statusIndicatorColor,
-            borderRadius: "50%",
-            border: "2px solid white",
-          }}
-        />
       )}
     </div>
   );
