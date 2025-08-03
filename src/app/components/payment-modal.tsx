@@ -19,10 +19,11 @@ export default function PaymentModal() {
   const isMobile = useIsMobile();
   const {
     isPaymentModalOpen,
-    setPaymentModalOpen,
+
     paymentTimeout,
     currentUserPeelWallet,
     entryFee,
+    username,
     players,
   } = useGameStore(
     useShallow((state) => ({
@@ -32,6 +33,7 @@ export default function PaymentModal() {
       entryFee: state.entryFee,
       currentUserPeelWallet: state.currentUserPeelWallet,
       players: state.players,
+      username: state.username,
     }))
   );
 
@@ -116,6 +118,7 @@ export default function PaymentModal() {
                       backgroundColor={
                         !isMobile ? (isPaid ? "#d4f5e5" : "#f0f0f5") : undefined
                       }
+                      isOwner={player.username == username}
                       statusText={
                         !isMobile
                           ? isPaid
