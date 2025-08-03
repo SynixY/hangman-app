@@ -2,6 +2,9 @@
 import React from "react";
 import { useGameStore } from "@/app/stores/useGameStore";
 import { useShallow } from "zustand/shallow";
+import PlayerItem from "../player-item"; // Adjust path if necessary
+import useIsMobile from "../../hooks/useIsMobile";
+
 export default function PlayersList() {
   const { serverPlayers, currentUser } = useGameStore(
     useShallow((state) => ({
@@ -9,66 +12,70 @@ export default function PlayersList() {
       currentUser: state.username,
     }))
   );
-  const maxPlayers = 4; // This could come from the store later
+  const maxPlayers = 4;
 
-  // The list of players to display on screen.
-  const displayPlayers: { username: string; isOwner: boolean }[] = [];
-  // 1. Add the current user to the list first, if they exist.
+  const displayPlayers: {
+    username: string;
+    isOwner: boolean;
+    avatarUrl?: string;
+  }[] = [];
+
   if (currentUser) {
-    displayPlayers.push({ username: currentUser, isOwner: true });
+    const currentUserData = serverPlayers.find(
+      (p) => p.username === currentUser
+    );
+    displayPlayers.push({
+      username: currentUser,
+      isOwner: true,
+      avatarUrl: currentUserData?.avatarUrl,
+    });
   }
 
-  // 2. Add other players from the server, making sure not to add the current user again.
   serverPlayers.forEach((player) => {
     if (player.username !== currentUser) {
-      displayPlayers.push({ username: player.username, isOwner: false });
+      displayPlayers.push({ ...player, isOwner: false });
     }
   });
 
+  const numEmptySlots = Math.max(0, maxPlayers - displayPlayers.length);
+
   return (
     <div className="jsx-5f9af3a98e99b444 left">
-      <h4 className="jsx-8a159d9480957b3c">
-        PLAYERS {displayPlayers.length}/{maxPlayers}
-      </h4>
+      {/* This dropdown is now always visible */}
+      <span className="jsx-5f9af3a98e99b444">
+        <label className="jsx-833d62ffcae7f9f select">
+          <select className="jsx-833d62ffcae7f9f" defaultValue={maxPlayers}>
+            <option value="4" className="jsx-833d62ffcae7f9f">
+              4 PLAYERS
+            </option>
+            <option value="8" className="jsx-833d62ffcae7f9f">
+              8 PLAYERS
+            </option>
+          </select>
+        </label>
+      </span>
       <div className="jsx-5f9af3a98e99b444 users">
         <div className="jsx-6c5c34bf46e1a27 players">
-          <div className="jsx-2980934243 scroll over top">
+          {/* Always use the 'scroll' class and include the scrollbar */}
+          <div className="jsx-2980934243 scroll">
             <div className="jsx-2980934243 scrollElements">
-              {/* Render the constructed list of players */}
               {displayPlayers.map((player) => (
-                <div
+                <PlayerItem
                   key={player.username}
-                  className="jsx-e5240cdf0a94de60 jsx-7347205 user"
-                >
-                  <div className="jsx-3239482990 avatar">
-                    <span className="jsx-3239482990" />
-                    <i className="jsx-3239482990" />
-                  </div>
-                  <span className="jsx-e5240cdf0a94de60 jsx-7347205">
-                    <p className="jsx-e5240cdf0a94de60 jsx-7347205 nick">
-                      {player.username}
-                    </p>
-                  </span>
-                  {/* Show owner icon for the current player */}
-                  {player.isOwner && (
-                    <figure className="jsx-e5240cdf0a94de60 jsx-7347205 owner" />
-                  )}
-                </div>
+                  username={player.username}
+                  isOwner={player.isOwner}
+                  avatarUrl={player.avatarUrl}
+                />
               ))}
-              {/* 3. Fill remaining slots with empty placeholders */}
-              {Array.from({ length: maxPlayers - displayPlayers.length }).map(
-                (_, i) => (
-                  <div
-                    key={`empty-${i}`}
-                    className="jsx-e5240cdf0a94de60 jsx-7347205 user empty"
-                  >
-                    <div className="jsx-e5240cdf0a94de60 jsx-7347205 avatar" />
-                    <span className="jsx-e5240cdf0a94de60 jsx-7347205">
-                      <p className="jsx-e5240cdf0a94de60 jsx-7347205">EMPTY</p>
-                    </span>
-                  </div>
-                )
-              )}
+              {Array.from({ length: numEmptySlots }).map((_, i) => (
+                <PlayerItem key={`empty-${i}`} isEmpty={true} />
+              ))}
+            </div>
+            <div className="jsx-2980934243 scrollBar">
+              <div
+                className="jsx-2980934243 scrollTrack"
+                style={{ top: "4px" }}
+              ></div>
             </div>
           </div>
         </div>

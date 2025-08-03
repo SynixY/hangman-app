@@ -40,10 +40,6 @@ export default function Game() {
 
   return (
     <>
-      <div className="jsx-b6582d438744e10b side">
-        <div id="garticphone-com_160x600" className="jsx-b6582d438744e10b" />
-      </div>
-
       <div
         id="content"
         className="jsx-c2cb53106fc23b05 jsx-3140246774"

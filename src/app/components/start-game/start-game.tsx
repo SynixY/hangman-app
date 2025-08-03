@@ -1,10 +1,11 @@
 "use client";
 import React, { useEffect } from "react";
 import PlayersList from "./players-list";
-import GameSettings from "./game-settings";
+
 import { useGameStore } from "@/app/stores/useGameStore";
 import { useShallow } from "zustand/react/shallow";
 import useIsMobile from "@/app/hooks/useIsMobile";
+import StartGameCenter from "./start-game-center";
 
 export default function StartGame() {
   const isMobile = useIsMobile();
@@ -50,7 +51,7 @@ export default function StartGame() {
             <div className="jsx-5f9af3a98e99b444 center">
               <PlayersList />
               <div style={{ marginTop: "15px" }}></div>
-              <GameSettings />
+              <StartGameCenter />
             </div>
           </div>
         </div>

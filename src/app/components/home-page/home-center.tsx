@@ -6,8 +6,14 @@ import MiniTutorialSteps from "./mini-tutorial-steps";
 export default function HomeCenter() {
   // Get the necessary state and actions from the store.
   // We only need username, setUsername, and setView.
-  const { username, setUsername, setView, errorMessage, setErrorMessage } =
-    useGameStore();
+  const {
+    username,
+    setUsername,
+    setView,
+    errorMessage,
+    setErrorMessage,
+    avatarUrl,
+  } = useGameStore();
 
   const handleGoToLobby = (e) => {
     e.preventDefault(); // Prevent the form from reloading the page
@@ -33,7 +39,10 @@ export default function HomeCenter() {
           <div className="jsx-d0e8374e17477ac4 data">
             <section className="jsx-d0e8374e17477ac4">
               <div className="jsx-263140084 avatar">
-                <span className="jsx-263140084" />
+                <span
+                  className="jsx-263140084"
+                  style={{ backgroundImage: `url(${avatarUrl})` }}
+                />
                 <button type="button" className="jsx-263140084" />
               </div>
               <span className="jsx-d0e8374e17477ac4">

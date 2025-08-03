@@ -30,7 +30,7 @@
 }
 
 .hangman-visual {
-  height: 80px;
+  height: 200px;
   width: 100%;
   border-radius: 10px;
   background-color: rgba(38, 28, 92, 0.2);
@@ -50,25 +50,28 @@
 
 .hangman-word {
   display: flex;
-  gap: 10px;
   justify-content: center;
+  align-items: center;
+  gap: 8px; /* Controls the space between letters */
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin-top: 15px;
+  padding: 0 10px; /* Prevents letters from touching screen edges */
 }
 
 .hangman-word-letter {
-  font-family: "Black", sans-serif;
-  font-size: 32px;
-  color: #fff;
-  background-color: rgba(38, 28, 92, 0.5);
-  min-width: 45px;
-  height: 55px;
   display: inline-flex;
-  justify-content: center;
   align-items: center;
-  border-radius: 6px;
-  border-bottom: 4px solid rgba(255, 255, 255, 0.6);
+  justify-content: center;
+  width: 35px; /* Reduced width for a smaller slot */
+  height: 45px; /* Reduced height */
+  background-color: rgba(0, 0, 0, 0.2);
+  border-bottom: 3px solid rgba(255, 255, 255, 0.8);
+  border-radius: 5px;
+  color: white;
+  font-family: "Black", sans-serif;
+  font-size: 24px; /* Reduced font size */
   text-transform: uppercase;
+  line-height: 1; /* Ensures text is centered vertically */
 }
 
 /* Game Input Controls */
@@ -814,5 +817,105 @@
 
   .win-modal-reward-banner {
     margin-bottom: 25px;
+  }
+}
+
+/* --- Hangman Component Styles --- */
+.hangman-timer-bar-container {
+  width: 100%;
+  height: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.hangman-timer-bar {
+  height: 100%;
+  background-color: #5cffb6;
+  border-radius: 5px;
+}
+
+.hangman-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.hangman-image {
+  height: 180px; /* Increased from 120px for a larger view */
+  object-fit: contain;
+  margin-bottom: 10px; /* Adds some space below the image */
+}
+
+.hangman-counters {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 5px 20px;
+  font-family: "Bold", sans-serif;
+  color: white;
+  font-size: 1.1rem;
+  position: absolute;
+  bottom: -5px;
+}
+
+/* --- GameInput Mask Styles --- */
+.game-input-mask {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 150px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  font-family: "Black", sans-serif;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.5rem;
+  text-transform: uppercase;
+}
+
+/* --- PlayerItem Animation --- */
+@keyframes turn-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.user.is-turn {
+  animation: turn-pulse 1.2s ease-in-out;
+  border: 2px solid #5cffb6;
+  color: #301a6b; /* Change text color for contrast */
+}
+
+/* Adjust PlayerItem nick color for better readability on highlight */
+.user.is-turn .nick {
+  color: #301a6b;
+  font-weight: bold;
+}
+
+/* --- Responsive Styles for Mobile --- */
+@media (max-width: 640px) {
+  .hangman-image {
+    height: 140px; /* Slightly smaller image for mobile screens */
+  }
+
+  .hangman-word {
+    gap: 5px; /* Tighter spacing on mobile */
+  }
+
+  .hangman-word-letter {
+    width: 28px; /* Even smaller slots for small screens */
+    height: 38px;
+    font-size: 20px;
+    border-bottom-width: 2px;
   }
 }

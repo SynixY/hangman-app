@@ -3,54 +3,31 @@ import React from "react";
 export default function Footer() {
   return (
     <footer className="jsx-ad15c1348c48af6b">
-      <a
-        href="https://gartic.com"
-        target="_blank"
-        aria-label="Gartic"
-        className="jsx-ad15c1348c48af6b gartic"
-      />
-      <span className="jsx-ad15c1348c48af6b">
-        <nav className="jsx-ad15c1348c48af6b">
+      <span className="jsx-ad15c1348c48af6b" style={{ width: "100%" }}>
+        <nav
+          className="jsx-ad15c1348c48af6b"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignContent: "center",
+          }}
+        >
           <a className="jsx-ad15c1348c48af6b" href="/it/terms">
-            TERMINI DI SERVIZIO
+            CA: SSSSSSSSSSSSSSSSSSSSSSSSSSSS
           </a>
           <hr className="jsx-ad15c1348c48af6b" />
-          <a className="jsx-ad15c1348c48af6b" href="/it/privacy">
-            PRIVACY
-          </a>
-          <hr className="jsx-ad15c1348c48af6b" />
-          <a className="jsx-ad15c1348c48af6b" href="/it/assets">
-            LOGOTIPO E IMMAGINI
-          </a>
-          <hr className="jsx-ad15c1348c48af6b" />
-          <a
-            href="https://medium.com/gartic"
-            target="_blank"
-            rel="noreferrer"
-            className="jsx-ad15c1348c48af6b"
-          >
-            BLOG
-          </a>
-          <hr className="jsx-ad15c1348c48af6b" />
-          <a className="jsx-ad15c1348c48af6b">CONTATTO</a>
-          <hr className="jsx-ad15c1348c48af6b" />
+
           <section className="jsx-ad15c1348c48af6b">
             <a
-              href="https://x.com/gartic"
+              href="https://x.com/hangarcade"
               target="_blank"
               rel="noreferrer"
               aria-label="X"
               className="jsx-ad15c1348c48af6b tw"
             />
+
             <a
-              href="https://youtube.com/gartic"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="YouTube"
-              className="jsx-ad15c1348c48af6b yt"
-            />
-            <a
-              href="https://discord.gg/gartic"
+              href="https://discord.gg/hangarcade"
               target="_blank"
               rel="noreferrer"
               aria-label="Discord"
@@ -59,12 +36,6 @@ export default function Footer() {
           </section>
         </nav>
       </span>
-      <a
-        href="https://onrizon.com"
-        target="_blank"
-        aria-label="Onrizon"
-        className="jsx-ad15c1348c48af6b onrizon"
-      />
     </footer>
   );
 }

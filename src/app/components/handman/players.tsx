@@ -1,12 +1,14 @@
 "use client";
 import { useGameStore } from "@/app/stores/useGameStore";
 import { useShallow } from "zustand/react/shallow";
+import PlayerItem from "../player-item"; // Adjust path if necessary
 
 export default function Players() {
-  const { players, currentUser } = useGameStore(
+  const { players, currentUser, currentTurnPlayer } = useGameStore(
     useShallow((state) => ({
       players: state.players,
       currentUser: state.username,
+      currentTurnPlayer: state.currentTurnPlayer,
     }))
   );
 
@@ -17,25 +19,16 @@ export default function Players() {
         <div className="jsx-3560981401 scroll">
           <div className="jsx-3560981401 scrollElements">
             {players.map((player) => (
-              <div
+              <PlayerItem
                 key={player.username}
-                className="jsx-e5240cdf0a94de60 jsx-7347205 user show"
-              >
-                <div className="jsx-4181276377 avatar">
-                  <span className="jsx-4181276377" />
-                  {/* We can add logic later for different icons */}
-                  {/* <i className="jsx-4181276377" /> */}
-                </div>
-                <span className="jsx-e5240cdf0a94de60 jsx-7347205">
-                  <p className="jsx-e5240cdf0a94de60 jsx-7347205 nick">
-                    {player.username}
-                  </p>
-                </span>
-                {/* Show owner icon for the current player */}
-                {currentUser === player.username && (
-                  <figure className="jsx-e5240cdf0a94de60 jsx-7347205 owner" />
-                )}
-              </div>
+                username={player.username}
+                isOwner={currentUser === player.username}
+                avatarUrl={player.avatarUrl}
+                isCurrentTurn={
+                  player.username.toLowerCase() ==
+                  currentTurnPlayer?.toLowerCase()
+                }
+              />
             ))}
           </div>
           <div className="jsx-3560981401 scrollBar">

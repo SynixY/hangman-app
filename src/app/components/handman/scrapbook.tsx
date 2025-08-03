@@ -9,7 +9,6 @@ import { useShallow } from "zustand/react/shallow";
 export default function Scrapbook() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // FIX: Select each piece of state individually to prevent infinite loops.
   const {
     messages,
     username,
@@ -18,6 +17,12 @@ export default function Scrapbook() {
     maskedWord,
     attemptsLeft,
     maxAttempts,
+    turnTime,
+    turnTimeLeft,
+    turnNumber,
+    playerMistakes,
+    maxPlayerMistakes,
+    currentTurnPlayer,
   } = useGameStore(
     useShallow((state) => ({
       messages: state.messages,
@@ -27,21 +32,36 @@ export default function Scrapbook() {
       maskedWord: state.maskedWord,
       attemptsLeft: state.attemptsLeft,
       maxAttempts: state.maxAttempts,
+      turnTime: state.turnTime,
+      turnTimeLeft: state.turnTimeLeft,
+      turnNumber: state.turnNumber,
+      playerMistakes: state.playerMistakes,
+      maxPlayerMistakes: state.maxPlayerMistakes,
+      currentTurnPlayer: state.currentTurnPlayer,
     }))
   );
-  // Auto-scroll the chat to the bottom when new messages arrive
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
+  const mistakes = maxAttempts - attemptsLeft;
+  const currentPlayerMistakes =
+    (currentTurnPlayer && playerMistakes[currentTurnPlayer]) || 0;
+
   return (
     <div className="jsx-380c8a0d0db173e2 scrapbook">
       <Hangman
         word={maskedWord}
-        mistakes={maxAttempts - attemptsLeft}
+        mistakes={mistakes}
         maxMistakes={maxAttempts}
+        turnTime={turnTime}
+        turnTimeLeft={turnTimeLeft}
+        turnNumber={turnNumber}
+        currentPlayerMistakes={currentPlayerMistakes}
+        maxPlayerMistakes={maxPlayerMistakes}
       />
 
       <h4 className="jsx-8a159d9480957b3c">GAME CHAT</h4>
@@ -59,6 +79,7 @@ export default function Scrapbook() {
                 username={msg.username}
                 message={msg.message}
                 isGuess={msg.isGuess}
+                avatarUrl={msg.avatarUrl ?? "/images/avatar/1.png"}
               />
             ))}
           </div>

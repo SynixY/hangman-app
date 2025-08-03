@@ -19958,9 +19958,8 @@ button.jsx-263140084:disabled:before {
 @media (max-width: 640px) {
   .background.jsx-2835833729 {
     background-color: rgba(0, 0, 0, 0.9);
-    height: -webkit-calc(100% - 50px);
-    height: -moz-calc(100% - 50px);
-    height: calc(100% - 50px);
+
+    height: 100%;
     overflow: hidden;
   }
   .content.jsx-2835833729 {
@@ -21086,4 +21085,19 @@ section.jsx-5f9af3a98e99b444 {
     right: 0;
     width: 100vw;
   }
+}
+
+.hamburguer.jsx-ddf51313b1730fe4 {
+  width: 27px;
+  height: 21px;
+  background-image: url(/images/hamburguer.svg);
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: absolute;
+  top: 15px;
+  left: 15px;
 }

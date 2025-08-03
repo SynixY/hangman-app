@@ -4,11 +4,12 @@ import { persist, PersistOptions } from "zustand/middleware";
 import { io, Socket } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 
-const BACKEND_URL = "https://j7xps13tu1ds9z-8000.proxy.runpod.net";
+const BACKEND_URL = "https://j7xps13tu1ds9z-8000.proxy.runpod.net/"; //"https://j7xps13tu1ds9z-8000.proxy.runpod.net";
 
 type Player = {
   username: string;
   has_paid?: boolean;
+  avatarUrl?: string;
 };
 
 type DisplayPlayer = {
@@ -20,6 +21,7 @@ type Message = {
   username: string;
   message: string;
   isGuess: boolean;
+  avatarUrl: string;
 };
 
 type Winner = {
@@ -47,13 +49,21 @@ interface GameState {
   wordLength: number;
   attemptsLeft: number;
   maxAttempts: number;
+  gameMode: "solo" | "multiplayer";
+  turnTime: number; // Total time per turn in seconds
+  turnTimeLeft: number; // Remaining time for the current turn
+  currentTurnPlayer: string | null; // Username of the player whose turn it is
+  turnNumber: number;
+  playerMistakes: { [username: string]: number }; // Tracks mistakes per player
+  maxPlayerMistakes: number; // Max mistakes before a player is out
   maskedWord: string;
   messages: Message[];
   winner: Winner;
   secretWord: string;
+  avatarUrl: string;
   rewardStatus: "pending" | "sent" | null;
   rewardTxSignature: string | null;
-
+  isTutorialOpen: boolean;
   // Actions
   setView: (view: "home" | "lobby" | "game") => void;
   setUsername: (username: string) => void;
@@ -69,6 +79,8 @@ interface GameState {
   connectSocket: () => void;
   resetGame: () => void;
   cancelMatchmaking: () => Promise<void>;
+
+  setIsTutorialOpen: (isOpen: boolean) => void;
 }
 
 type PersistedState = Pick<GameState, "jwt" | "username">;
@@ -115,11 +127,19 @@ export const useGameStore = create<GameState>()(
       isPaymentModalOpen: false,
       isCountdownModalOpen: false,
       isWinModalOpen: false,
+      isTutorialOpen: false,
       username: "",
       jwt: null,
       socket: null,
       roomId: null,
       difficulty: "easy",
+      gameMode: "multiplayer", // Default to multiplayer
+      turnTime: 30, // Example: 30 seconds per turn
+      turnTimeLeft: 30,
+      currentTurnPlayer: "Gazz",
+      turnNumber: 1,
+      playerMistakes: {},
+      maxPlayerMistakes: 3, // Example: 3 mistakes and you're out
       players: [],
       currentUserPeelWallet: null,
       entryFee: 0,
@@ -133,8 +153,10 @@ export const useGameStore = create<GameState>()(
       secretWord: "",
       rewardStatus: null,
       rewardTxSignature: null,
+      avatarUrl: "/images/avatar/1.png",
 
       // --- ACTIONS ---
+      setIsTutorialOpen: (isOpen) => set({ isTutorialOpen: isOpen }),
       setView: (view) => set({ view, errorMessage: "" }),
       setUsername: (username) => set({ username }),
       setDifficulty: (difficulty) => set({ difficulty }),
@@ -308,6 +330,13 @@ export const useGameStore = create<GameState>()(
             maxAttempts: data.attemptsLeft,
             players: data.players,
             messages: [],
+            // Add new state here
+            gameMode: data.gameMode || "multiplayer",
+            currentTurnPlayer: data.currentTurnPlayer ?? "Gazz",
+            turnNumber: 1,
+            playerMistakes: {},
+            turnTimeLeft: data.turnTime || 10,
+            turnTime: data.turnTime || 30,
           });
         });
         newSocket.on("new_message", (data) =>
@@ -323,6 +352,16 @@ export const useGameStore = create<GameState>()(
             attemptsLeft: data.attemptsLeft,
           }));
         });
+        newSocket.on("turn_update", (data) => {
+          console.log("Turn Update Received:", data);
+          set({
+            currentTurnPlayer: data.currentTurnPlayer,
+            turnTimeLeft: data.turnTime, // Reset timer
+            turnNumber: data.turnNumber,
+            playerMistakes: data.playerMistakes || {},
+          });
+        });
+
         newSocket.on("game_over", (data) => {
           const isWinner = data.winner?.username === get().username;
           set({
