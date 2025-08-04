@@ -246,6 +246,8 @@ export const useGameStore = create<GameState>()(
             isLoading: false,
             view: "lobby",
           });
+
+          get().connectSocket();
         } catch (error: any) {
           set({ errorMessage: error.message, isLoading: false });
         }
