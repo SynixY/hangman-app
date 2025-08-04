@@ -1,4 +1,5 @@
 import React from "react";
+import { BsTwitterX } from "react-icons/bs";
 
 export default function Footer() {
   return (
@@ -12,27 +13,16 @@ export default function Footer() {
             alignContent: "center",
           }}
         >
-          <a className="jsx-ad15c1348c48af6b" href="/it/terms">
-            CA: SSSSSSSSSSSSSSSSSSSSSSSSSSSS
+          <a className="jsx-ad15c1348c48af6b" href="https://bonk.fun/">
+            CA: Coming soon
           </a>
           <hr className="jsx-ad15c1348c48af6b" />
 
           <section className="jsx-ad15c1348c48af6b">
-            <a
-              href="https://x.com/hangarcade"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="X"
-              className="jsx-ad15c1348c48af6b tw"
-            />
-
-            <a
-              href="https://discord.gg/hangarcade"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Discord"
-              className="jsx-ad15c1348c48af6b dc"
-            />
+            <a href="https://x.com/hangarcade" target="_blank" rel="noreferrer">
+              {" "}
+              <BsTwitterX style={{ color: "white" }} />
+            </a>
           </section>
         </nav>
       </span>

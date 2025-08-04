@@ -9,7 +9,8 @@ import { useGameStore } from "@/app/stores/useGameStore";
 import GameSelector from "./game-selector";
 
 function Home() {
-  const scale = useResponsiveScale(1300);
+  const scale = useResponsiveScale(1800);
+  console.log(scale);
   const isMobile = useIsMobile(800);
   const setIsTutorialOpen = useGameStore((state) => state.setIsTutorialOpen);
 
@@ -41,31 +42,16 @@ function Home() {
   // If it's desktop, render the new layout with the sidebar
   return (
     <>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "280px 1fr",
-          height: "100vh",
-          width: "100%",
-          alignItems: "center",
-        }}
-      >
-        {/* Column 1: The Game Selector (Desktop Only) */}
-        <div style={{ height: "100%", alignSelf: "stretch" }}>
-          <GameSelector />
-        </div>
-
-        {/* Column 2: Main Content */}
-        <div id="content" className="jsx-c2cb53106fc23b05 jsx-3140246774">
-          <div
-            style={{ transform: `scale(${scale})` }}
-            className="jsx-c2cb53106fc23b05 jsx-3140246774 screen"
-          >
-            <div className="jsx-d0e8374e17477ac4 start">
-              <LogoTopBar />
-              <HomeCenter />
-              <Footer />
-            </div>
+      {/* Column 2: Main Content */}
+      <div id="content" className="jsx-c2cb53106fc23b05 jsx-3140246774">
+        <div
+          style={{ transform: `scale(${scale})` }}
+          className="jsx-c2cb53106fc23b05 jsx-3140246774 screen"
+        >
+          <div className="jsx-d0e8374e17477ac4 start">
+            <LogoTopBar />
+            <HomeCenter />
+            <Footer />
           </div>
         </div>
       </div>

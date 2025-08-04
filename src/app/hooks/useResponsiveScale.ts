@@ -13,7 +13,7 @@ const useResponsiveScale = (baseWidth = 1300) => {
   useEffect(() => {
     const handleResize = () => {
       // Normalize scale based on the base width, but don't go larger than 1.0
-      const newScale = Math.min(1.0, window.innerWidth / baseWidth);
+      const newScale = Math.min(1.5, window.innerWidth / baseWidth);
       setScale(newScale);
     };
 
