@@ -22,8 +22,8 @@ const tutoSteps = [
     imageSrc: "/images/tutorial/step2.png",
   },
   {
-    title: "4. WIN $ARENA",
-    text: "First to solve the word wins the full prize pool in $ARENA.",
+    title: "4. WIN $ARCADE",
+    text: "First to solve the word wins the full prize pool in $ARCADE.",
     imageSrc: "/images/tutorial/step3.png",
   },
   {

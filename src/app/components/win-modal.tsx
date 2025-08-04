@@ -89,7 +89,7 @@ export default function WinModal() {
 
         <div className="win-modal-reward-banner">
           <div className={`win-modal-amount ${modalState}-amount`}>
-            {isWinner ? "+25,000 $HANG" : `-${entryFee} SOL`}
+            {isWinner ? "+ $ARCADE" : `-${entryFee} SOL`}
           </div>
         </div>
 

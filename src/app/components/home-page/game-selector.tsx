@@ -1,31 +1,15 @@
 "use client";
 import React from "react";
 
-// Helper component for the icons
-const GameIcon = ({ children }: { children: React.ReactNode }) => (
-  <div
-    style={{
-      height: "64px",
-      width: "64px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      marginBottom: "0.5rem",
-    }}
-  >
-    {children}
-  </div>
-);
-
-// A simple SVG placeholder for the hangman icon
-const HangmanIcon = () => (
+// A simple SVG placeholder for the hangman icon, styled to match the flat UI
+const HangmanIcon = ({ color = "#6D28D9" }) => (
   <svg
     width="48"
     height="48"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
+    stroke={color}
+    strokeWidth="2.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -35,14 +19,14 @@ const HangmanIcon = () => (
 );
 
 // A simple SVG placeholder for a shooter icon
-const ShooterIcon = () => (
+const ShooterIcon = ({ color = "#9CA3AF" }) => (
   <svg
     width="48"
     height="48"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
+    stroke={color}
+    strokeWidth="2.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -57,51 +41,49 @@ const games = [
 
 export default function GameSelector() {
   const containerStyle: React.CSSProperties = {
-    padding: "2rem 1rem",
+    padding: "2rem",
     display: "flex",
     flexDirection: "column",
-    gap: "1.5rem", // Increased gap
+    gap: "1.5rem",
     height: "100%",
-    background: "transparent", // No background, it will inherit from parent
+    backgroundColor: "#111827", // A very dark grey for the background
   };
 
   const getLinkStyle = (active: boolean): React.CSSProperties => ({
     display: "flex",
-    flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
+    gap: "1rem",
     fontFamily: '"Bold", sans-serif',
-    fontSize: "1rem",
-    fontWeight: "bold",
-    color: active ? "#3730A3" : "#A78BFA", // Dark purple for active, lighter for inactive
-    backgroundColor: "#E9D5FF", // Light lilac background
+    fontSize: "1.25rem",
+    fontWeight: "900", // Extra bold
+    color: active ? "white" : "#9CA3AF", // White for active, grey for inactive
+    backgroundColor: active ? "#4F46E5" : "#1F2937", // Bright purple for active, dark grey for inactive
     textDecoration: "none",
-    padding: "1rem",
-    borderRadius: "16px", // More rounded corners
+    padding: "1rem 1.5rem",
+    borderRadius: "16px",
     transition: "all 0.2s ease-in-out",
     cursor: active ? "pointer" : "not-allowed",
-    border: "4px solid",
-    borderColor: active ? "#34D399" : "#C4B5FD", // Green for active, lilac for inactive
-    opacity: active ? 1 : 0.6,
-    minHeight: "140px",
+    border: "2px solid",
+    borderColor: active ? "#818CF8" : "#374151", // Lighter purple border for active
+    boxShadow: active ? "0 0 20px rgba(79, 70, 229, 0.5)" : "none",
   });
 
   const soonTagStyle: React.CSSProperties = {
-    fontSize: "0.7rem",
+    fontSize: "0.75rem",
     fontWeight: "bold",
-    color: "#4C1D95",
-    marginTop: "4px",
-    backgroundColor: "rgba(255, 255, 255, 0.5)",
-    padding: "2px 8px",
+    color: "#111827",
+    backgroundColor: "#FBBF24", // A punchy yellow/orange
+    padding: "4px 8px",
     borderRadius: "6px",
+    marginLeft: "auto", // Pushes the tag to the far right
   };
 
   return (
     <div style={containerStyle}>
       {games.map((game) => (
         <a key={game.name} href={game.href} style={getLinkStyle(game.active)}>
-          <GameIcon>{game.icon}</GameIcon>
-          <span style={{ textAlign: "center" }}>{game.name.toUpperCase()}</span>
+          {game.icon}
+          <span>{game.name.toUpperCase()}</span>
           {!game.active && <span style={soonTagStyle}>SOON</span>}
         </a>
       ))}
