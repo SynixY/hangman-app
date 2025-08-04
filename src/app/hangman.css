@@ -921,3 +921,14 @@
     border-bottom-width: 2px;
   }
 }
+
+/* Animation for the top ticker */
+@keyframes ticker-animation {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    /* This moves the text to the left by half its total width, creating a seamless loop */
+    transform: translateX(-50%);
+  }
+}

@@ -403,9 +403,8 @@ export const useGameStore = create<GameState>()(
           get().setErrorMessage(data.message);
         });
         newSocket.on("error", (error) => {
-          console.error("Fatal Server Error:", error.message);
+          console.log(error);
           get().setErrorMessage(error.message || "A critical error occurred.");
-          get().resetGame();
         });
         newSocket.on("match_found", (data) => {
           console.log("Match has been found!", data);

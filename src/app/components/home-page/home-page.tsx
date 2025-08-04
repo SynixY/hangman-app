@@ -6,11 +6,10 @@ import Footer from "./footer";
 import useResponsiveScale from "../../hooks/useResponsiveScale";
 import useIsMobile from "../../hooks/useIsMobile";
 import { useGameStore } from "@/app/stores/useGameStore";
-import GameSelector from "./game-selector";
+import Ticker from "./ticker"; // 1. Import the new component
 
 function Home() {
   const scale = useResponsiveScale(1800);
-  console.log(scale);
   const isMobile = useIsMobile(800);
   const setIsTutorialOpen = useGameStore((state) => state.setIsTutorialOpen);
 
@@ -18,6 +17,7 @@ function Home() {
   if (isMobile) {
     return (
       <>
+        <Ticker />
         <div id="content" className="jsx-c2cb53106fc23b05 jsx-3140246774">
           <div
             style={{ transform: `scale(1.0)` }}
@@ -42,7 +42,7 @@ function Home() {
   // If it's desktop, render the new layout with the sidebar
   return (
     <>
-      {/* Column 2: Main Content */}
+      <Ticker /> {/* 3. And also add the Ticker here */}
       <div id="content" className="jsx-c2cb53106fc23b05 jsx-3140246774">
         <div
           style={{ transform: `scale(${scale})` }}
