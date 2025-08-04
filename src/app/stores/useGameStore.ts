@@ -4,7 +4,7 @@ import { persist, PersistOptions } from "zustand/middleware";
 import { io, Socket } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 
-const BACKEND_URL = "http://localhost:8000"; //" ";https://9yfbbh3enhk8ll-8000.proxy.runpod.net
+const BACKEND_URL = "https://9yfbbh3enhk8ll-8000.proxy.runpod.net/"; //" "http://localhost:8000"
 
 type Player = {
   username: string;
