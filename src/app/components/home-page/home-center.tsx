@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useGameStore } from "@/app/stores/useGameStore"; // Adjust path to your store
 import MiniTutorialSteps from "./mini-tutorial-steps";
 import { useShallow } from "zustand/shallow";
@@ -7,20 +7,29 @@ import { useShallow } from "zustand/shallow";
 export default function HomeCenter() {
   // Use local state for the input field
 
-  const { login, errorMessage, isLoading, avatarUrl, globalUsername } =
-    useGameStore(
-      useShallow((state) => ({
-        login: state.login,
-        errorMessage: state.errorMessage,
-        isLoading: state.isLoading,
-        avatarUrl: state.avatarUrl,
-        globalUsername: state.username,
-      }))
-    );
+  const {
+    login,
+    errorMessage,
+    isLoading,
+    avatarUrl,
+    globalUsername,
+    updateAvatar,
+  } = useGameStore(
+    useShallow((state) => ({
+      login: state.login,
+      errorMessage: state.errorMessage,
+      isLoading: state.isLoading,
+      avatarUrl: state.avatarUrl,
+      globalUsername: state.username,
+      updateAvatar: state.updateAvatar,
+    }))
+  );
 
   // Use local state for the input field to avoid writing to storage on every key press
   const [localUsername, setLocalUsername] = useState(globalUsername);
 
+  // 3. Create a ref for the hidden file input
+  const fileInputRef = useRef<HTMLInputElement>(null);
   // FIX: This effect syncs the input field with the stored username when the page loads.
   useEffect(() => {
     setLocalUsername(globalUsername);
@@ -29,6 +38,14 @@ export default function HomeCenter() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     login(localUsername);
+  };
+
+  // 4. Create the handler for the file input
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      updateAvatar(file);
+    }
   };
 
   return (
@@ -47,7 +64,18 @@ export default function HomeCenter() {
                   className="jsx-263140084"
                   style={{ backgroundImage: `url(${avatarUrl})` }}
                 />
-                <button type="button" className="jsx-263140084" />
+                <button
+                  type="button"
+                  className="jsx-263140084"
+                  onClick={() => fileInputRef.current?.click()}
+                />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                  accept="image/png, image/jpeg, image/gif"
+                />
               </div>
               <span className="jsx-d0e8374e17477ac4">
                 <h4 className="jsx-d0e8374e17477ac4">
@@ -67,19 +95,11 @@ export default function HomeCenter() {
           </div>
         </div>
         <div className="jsx-d0e8374e17477ac4 action">
-          <button
-            type="submit"
-            className="jsx-1e5748a2310b0bd small"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <strong className="jsx-d0e8374e17477ac4">CONNECTING...</strong>
-            ) : (
-              <>
-                <i className="jsx-bf1d798ec2f16818 playSmall" />{" "}
-                <strong className="jsx-d0e8374e17477ac4">START</strong>
-              </>
-            )}
+          <button type="submit" className="jsx-1e5748a2310b0bd small">
+            <>
+              <i className="jsx-bf1d798ec2f16818 playSmall" />{" "}
+              <strong className="jsx-d0e8374e17477ac4">START</strong>
+            </>
           </button>
         </div>
       </form>

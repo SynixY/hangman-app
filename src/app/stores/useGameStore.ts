@@ -12,9 +12,14 @@ type Player = {
   avatarUrl?: string;
 };
 
-type DisplayPlayer = {
-  username: string;
-  isOwner: boolean;
+const getRemainingSeconds = (
+  startTime: number | undefined,
+  totalDuration: number
+): number => {
+  if (!startTime) return totalDuration;
+  const elapsedMs = Date.now() - startTime;
+  const elapsedSeconds = Math.floor(elapsedMs / 1000);
+  return Math.max(0, totalDuration - elapsedSeconds);
 };
 
 type Message = {
@@ -52,6 +57,7 @@ interface GameState {
   gameMode: "solo" | "multiplayer";
   turnTime: number; // Total time per turn in seconds
   turnTimeLeft: number; // Remaining time for the current turn
+  turnStartTime: number | null; // Global turn time
   currentTurnPlayer: string | null; // Username of the player whose turn it is
   turnNumber: number;
   playerMistakes: { [username: string]: number }; // Tracks mistakes per player
@@ -71,6 +77,7 @@ interface GameState {
   setUsername: (username: string) => void;
   setDifficulty: (difficulty: "easy" | "hard") => void;
   setGameMode: (gameMode: "solo" | "multiplayer") => void;
+  updateAvatar: (file: File) => Promise<void>; // Add this
   setWinModalOpen: (isOpen: boolean) => void;
   setCountdownModalOpen: (isOpen: boolean) => void;
   setPaymentModalOpen: (isOpen: boolean) => void;
@@ -89,7 +96,7 @@ interface GameState {
 
 type PersistedState = Pick<GameState, "jwt" | "username" | "avatarUrl">;
 
-const persistOptions: PersistOptions<GameState, PersistState> = {
+const persistOptions: PersistOptions<GameState, PersistedState> = {
   name: "hangman-game-storage",
   partialize: (state) => ({
     jwt: state.jwt,
@@ -99,17 +106,21 @@ const persistOptions: PersistOptions<GameState, PersistState> = {
   onRehydrateStorage: () => (state) => {
     if (state?.jwt) {
       try {
-        const decoded = jwtDecode(state.jwt) as { exp: number };
+        const decoded = jwtDecode(state.jwt) as {
+          exp: number;
+          username: string;
+          avatarUrl: string;
+        };
         if (Date.now() < decoded.exp * 1000) {
-          // If the token is valid, immediately try to reconnect the socket.
-          console.log("Valid session found, attempting to reconnect...");
+          // FIX: Sync state from the valid token on load
+          state.username = decoded.username;
+          state.avatarUrl = decoded.avatarUrl;
           state.connectSocket();
         } else {
-          // If token is expired, reset the state.
-          state.resetGame();
+          state.resetGame(); // Full logout
         }
       } catch (e) {
-        state.resetGame();
+        state.resetGame(); // Full logout
       }
     }
   },
@@ -135,6 +146,7 @@ export const useGameStore = create<GameState>()(
       gameMode: "multiplayer",
       turnTime: 30,
       turnTimeLeft: 30,
+      turnStartTime: null,
       currentTurnPlayer: null,
       turnNumber: 1,
       playerMistakes: {},
@@ -210,29 +222,24 @@ export const useGameStore = create<GameState>()(
         }
       },
       startMatchmaking: () => {
-        const { jwt, socket, difficulty, gameMode, setErrorMessage } = get();
-        if (socket || !jwt) return;
-
-        // Add this validation block
-        if (!gameMode || !difficulty) {
-          console.error(
-            "Attempted to start matchmaking without selecting a game mode."
+        const { socket, difficulty, gameMode, setErrorMessage } = get();
+        if (!socket)
+          return setErrorMessage(
+            "Not connected to the server. Please refresh."
           );
-          setErrorMessage("Please select a game mode first.");
-          return;
-        }
 
-        // If validation passes, proceed to connect.
-        get().connectSocket();
+        console.log(`Requesting a '${difficulty}' '${gameMode}' game...`);
+        set({ isLoading: true });
+        // FIX: This is now the ONLY place that tells the server to start a game.
+        socket.emit("start_matchmaking", { difficulty, gameMode });
       },
 
       cancelMatchmaking: () => {
-        if (get().turnTimerInterval) {
-          clearInterval(get().turnTimerInterval!);
-        }
-        get().socket?.disconnect();
-        set({ socket: null, isLoading: false, turnTimerInterval: null });
-        console.log("Matchmaking cancelled by user.");
+        const { socket } = get();
+        // Send the cancel event to the server
+        socket?.emit("cancel_matchmaking");
+        // Immediately update the UI
+        set({ isLoading: false });
       },
 
       resetGame: () => {
@@ -262,7 +269,7 @@ export const useGameStore = create<GameState>()(
           clearInterval(get().turnTimerInterval!);
         }
         set({
-          socket: null,
+          isPaymentModalOpen: false,
           isLoading: false,
           roomId: null,
           players: [],
@@ -272,17 +279,17 @@ export const useGameStore = create<GameState>()(
       },
 
       connectSocket: () => {
-        const { jwt, difficulty, gameMode, resetGame } = get();
-        if (!jwt) return;
+        const { jwt, socket, resetGame } = get();
+        if (socket || !jwt) return;
 
-        console.log(
-          `Connecting to find a '${difficulty}' '${gameMode}' game...`
-        );
-        set({ isLoading: true, errorMessage: "" });
+        const newSocket = io(BACKEND_URL, { auth: { token: jwt } });
+        set({ socket: newSocket });
 
-        const newSocket = io(BACKEND_URL, {
-          auth: { token: jwt },
-          query: { difficulty, gameMode },
+        newSocket.on("connect", () => {
+          console.log(
+            "Socket connected and authenticated. Listening for game state."
+          );
+          newSocket.emit("request_room_state");
         });
 
         set({ socket: newSocket });
@@ -297,11 +304,7 @@ export const useGameStore = create<GameState>()(
         // FIX: This new handler will restore your game state after a refresh.
         newSocket.on("full_room_state", (data) => {
           console.log("Received full room state:", data);
-          if (!data) {
-            // If server sends null, it means we are not in a room.
-            set({ view: "lobby" });
-            return;
-          }
+          if (!data) return set({ view: "lobby" });
 
           if (data.state === "waiting_for_payment") {
             const { sub: myPlayerId } = jwtDecode(get().jwt!) as {
@@ -313,30 +316,44 @@ export const useGameStore = create<GameState>()(
 
             set({
               isPaymentModalOpen: true,
-              paymentTimeout: data.paymentTimeout,
+              paymentTimeout: getRemainingSeconds(
+                data.paymentStartTime,
+                data.paymentTimeout
+              ),
               entryFee: data.entryFee,
               roomId: data.roomId,
               players: data.players,
               currentUserPeelWallet: myPaymentInfo?.peelWalletAddress,
             });
           } else if (data.state === "playing") {
+            if (get().turnTimerInterval)
+              clearInterval(get().turnTimerInterval!);
             set({
               view: "game",
               isPaymentModalOpen: false,
               roomId: data.roomId,
               players: data.players,
               maskedWord: data.maskedWord,
-              // ... (and all other relevant game state properties)
+              turnStartTime: data.turnStartTime,
             });
+
+            const newInterval = setInterval(() => {
+              const startTime = get().turnStartTime;
+              if (startTime) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                set({ turnTimeLeft: Math.max(0, get().turnTime - elapsed) });
+              }
+            }, 1000);
+
+            set({ turnTimerInterval: newInterval });
           }
         });
 
-        newSocket.on("error", (errorData) => {
-          console.error("Server Error:", errorData.message);
-          // Use the existing setErrorMessage action to show the error
-          get().setErrorMessage(
-            errorData.message || "An unknown error occurred."
-          );
+        newSocket.on("error", (error) => {
+          // Handles fatal errors
+          console.error("Fatal Server Error:", error.message);
+          get().setErrorMessage(error.message || "A critical error occurred.");
+          get().resetGame();
         });
         newSocket.on("disconnect", (reason) => {
           if (reason === "io server disconnect") {
@@ -369,6 +386,7 @@ export const useGameStore = create<GameState>()(
         });
 
         newSocket.on("game_started", (data) => {
+          if (get().turnTimerInterval) clearInterval(get().turnTimerInterval!);
           set({
             view: "game",
             isPaymentModalOpen: false,
@@ -383,17 +401,20 @@ export const useGameStore = create<GameState>()(
             turnNumber: data.turnNumber,
             playerMistakes: {},
             turnTime: data.turnTime,
-            turnTimeLeft: data.turnTime,
+            turnStartTime: data.turnStartTime, // Set the start time
           });
 
           if (data.gameMode === "solo" || data.gameMode === "multiplayer") {
             if (get().turnTimerInterval)
               clearInterval(get().turnTimerInterval!);
 
+            // Start the timer interval
             const newInterval = setInterval(() => {
-              set((state) => ({
-                turnTimeLeft: Math.max(0, state.turnTimeLeft - 1),
-              }));
+              const startTime = get().turnStartTime;
+              if (startTime) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                set({ turnTimeLeft: Math.max(0, get().turnTime - elapsed) });
+              }
             }, 1000);
             set({ turnTimerInterval: newInterval });
           }
@@ -409,7 +430,10 @@ export const useGameStore = create<GameState>()(
             isPaymentModalOpen: true,
             isLoading: false,
             entryFee: data.fee,
-            paymentTimeout: data.timeoutSeconds,
+            paymentTimeout: getRemainingSeconds(
+              data.paymentStartTime,
+              data.timeoutSeconds
+            ),
             // This will now correctly be the unique wallet for the current player
             currentUserPeelWallet: myPaymentInfo?.peelWalletAddress,
             players: data.players.map((p: any) => ({
@@ -464,22 +488,22 @@ export const useGameStore = create<GameState>()(
         });
         newSocket.on("turn_update", (data) => {
           // Clear any old timer that might be running
-          if (get().turnTimerInterval) {
-            clearInterval(get().turnTimerInterval!);
-          }
+          if (get().turnTimerInterval) clearInterval(get().turnTimerInterval!);
 
           set({
             currentTurnPlayer: data.currentTurnPlayer,
-            turnTimeLeft: data.turnTime, // Reset timer to full duration
+            turnStartTime: data.turnStartTime, // Set the new start time
             turnNumber: data.turnNumber,
             playerMistakes: data.playerMistakes || {},
           });
 
-          // Create a new interval to tick down the timer
+          // Start the new timer interval
           const newInterval = setInterval(() => {
-            set((state) => ({
-              turnTimeLeft: Math.max(0, state.turnTimeLeft - 1),
-            }));
+            const startTime = get().turnStartTime;
+            if (startTime) {
+              const elapsed = Math.floor((Date.now() - startTime) / 1000);
+              set({ turnTimeLeft: Math.max(0, get().turnTime - elapsed) });
+            }
           }, 1000);
 
           set({ turnTimerInterval: newInterval });
@@ -493,6 +517,7 @@ export const useGameStore = create<GameState>()(
             get().setErrorMessage(
               "Payment timeout, you will get refunded automatically"
             );
+            get().resetGameState();
             return;
           }
           const isWinner = data.winner?.username === get().username;
@@ -509,6 +534,45 @@ export const useGameStore = create<GameState>()(
         newSocket.on("reward_sent", (data) => {
           set({ rewardStatus: "sent", rewardTxSignature: data.signature });
         });
+      },
+      updateAvatar: async (file: File) => {
+        const { jwt, setErrorMessage } = get();
+        if (!jwt) {
+          setErrorMessage("You must be logged in to change your avatar.");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("avatar", file);
+
+        set({ isLoading: true });
+        try {
+          const response = await fetch(`${BACKEND_URL}/upload-avatar`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${jwt}` },
+            body: formData,
+          });
+
+          const data = await response.json();
+          if (!response.ok)
+            throw new Error(data.error || "Failed to upload avatar.");
+
+          // Update the store with the new JWT and avatar URL
+          set({
+            jwt: data.jwt,
+            avatarUrl: data.avatarUrl,
+          });
+
+          // FIX: Disconnect the old socket (which has the old identity)
+          get().socket?.disconnect();
+
+          // Reconnect with the new token to update the server's knowledge of our avatar
+          get().connectSocket();
+        } catch (error: any) {
+          setErrorMessage(error.message);
+        } finally {
+          set({ isLoading: false });
+        }
       },
 
       // These actions are simple setters now, cleanup is handled by resetGame

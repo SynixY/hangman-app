@@ -6,10 +6,11 @@ import PlayerItem from "../player-item"; // Adjust path if necessary
 import useIsMobile from "../../hooks/useIsMobile";
 
 export default function PlayersList() {
-  const { serverPlayers, currentUser } = useGameStore(
+  const { serverPlayers, currentUser, avatarUrl } = useGameStore(
     useShallow((state) => ({
       serverPlayers: state.players,
       currentUser: state.username,
+      avatarUrl: state.avatarUrl,
     }))
   );
   const maxPlayers = 4;
@@ -27,7 +28,7 @@ export default function PlayersList() {
     displayPlayers.push({
       username: currentUser,
       isOwner: true,
-      avatarUrl: currentUserData?.avatarUrl,
+      avatarUrl: avatarUrl,
     });
   }
 
