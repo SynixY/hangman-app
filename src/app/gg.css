@@ -2116,7 +2116,7 @@ body {
   background: -webkit-linear-gradient(
     250deg,
     rgba(92, 30, 166, 1) 0%,
-    rgba(200, 67, 94, 1) 100%
+    #fdbf0c 100%
   );
   background: -moz-linear-gradient(
     250deg,
@@ -2158,19 +2158,13 @@ body {
   -moz-box-direction: normal;
   -ms-flex-direction: row;
   flex-direction: row;
-  background-image: url(/images/textura.png);
+  background-image: url(/images/bonk-transparent.png);
 
-  background-image: url(/images/bonk-transparent.svg);
-    background-image: 
-    linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)),
-    url(/images/bonk-transparent.svg), 
-    url(/images/textura.png);
+  /* Set the size for each instance of the background image */
+  background-size: 200px; /* You can change this value to make it bigger or smaller */
 
-  /* You may also want to control how the backgrounds repeat and position */
-  background-repeat: no-repeat, no-repeat, repeat;
-  background-position: center, center, center;
-  background-size: contain, contain, auto;
-
+  /* Repeat the image to create the pattern */
+  background-repeat: repeat;
 }
 .fade-enter,
 .fade-exit {
