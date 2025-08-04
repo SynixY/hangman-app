@@ -199,10 +199,39 @@ export const useGameStore = create<GameState>()(
 
           const data = await response.json();
           if (!response.ok) {
-            const message = data.error || "Login failed. Please try again.";
-            setErrorMessage(message);
+            const message = data.error || "Login failed.";
+
+            // FIX: Check for the specific error message from the server.
+            if (message.includes("User for this token not found")) {
+              console.log(
+                "Stale user session detected. Clearing local storage."
+              );
+              // This function clears localStorage and resets the state.
+              set({
+                socket: null,
+                roomId: null,
+                players: [],
+                messages: [],
+                isPaymentModalOpen: false,
+                isCountdownModalOpen: false,
+                isWinModalOpen: false,
+                isLoading: false,
+                errorMessage: "",
+                winner: null,
+                rewardStatus: null,
+                rewardTxSignature: null,
+                view: "home",
+                turnTimerInterval: null,
+                jwt: null,
+                username: "",
+              });
+              // Set a user-friendly message.
+              setErrorMessage("Your session was invalid. Please log in again.");
+            } else {
+              setErrorMessage(message);
+            }
             set({ isLoading: false });
-            return;
+            return; // Stop the function
           }
 
           const decoded: { username: string; avatarUrl: string } = jwtDecode(
@@ -279,28 +308,19 @@ export const useGameStore = create<GameState>()(
       },
 
       connectSocket: () => {
-        const { jwt, socket, resetGame } = get();
+        const { jwt, socket } = get();
+        // Prevent reconnecting if a socket already exists or if not logged in.
         if (socket || !jwt) return;
 
+        // Establish the connection ONCE.
         const newSocket = io(BACKEND_URL, { auth: { token: jwt } });
         set({ socket: newSocket });
-
         newSocket.on("connect", () => {
           console.log(
-            "Socket connected and authenticated. Listening for game state."
+            "Socket connected and authenticated. Requesting game state..."
           );
           newSocket.emit("request_room_state");
         });
-
-        set({ socket: newSocket });
-
-        newSocket.on("connect", () => {
-          console.log("Socket connected. Requesting current room state...");
-          // FIX: Immediately ask the server for the current game state.
-          newSocket.emit("request_room_state");
-          set({ isLoading: false });
-        });
-
         // FIX: This new handler will restore your game state after a refresh.
         newSocket.on("full_room_state", (data) => {
           console.log("Received full room state:", data);
@@ -328,15 +348,31 @@ export const useGameStore = create<GameState>()(
           } else if (data.state === "playing") {
             if (get().turnTimerInterval)
               clearInterval(get().turnTimerInterval!);
+
             set({
               view: "game",
-              isPaymentModalOpen: false,
               roomId: data.roomId,
               players: data.players,
+              gameMode: data.gameMode,
+              difficulty: data.difficulty,
+              maxAttempts: data.maxAttempts,
+              maxPlayerMistakes: data.maxPlayerMistakes,
+              playerMistakes: data.playerMistakes,
+              turnNumber: data.turnNumber,
+              turnTime: data.turnTime,
               maskedWord: data.maskedWord,
+              attemptsLeft: data.attemptsLeft,
+              currentTurnPlayer: data.currentTurnPlayer,
               turnStartTime: data.turnStartTime,
+              isPaymentModalOpen: false,
+              turnTimeLeft: getRemainingSeconds(
+                data.turnStartTime,
+                data.turnTime
+              ),
             });
 
+            if (get().turnTimerInterval)
+              clearInterval(get().turnTimerInterval!);
             const newInterval = setInterval(() => {
               const startTime = get().turnStartTime;
               if (startTime) {
@@ -344,11 +380,9 @@ export const useGameStore = create<GameState>()(
                 set({ turnTimeLeft: Math.max(0, get().turnTime - elapsed) });
               }
             }, 1000);
-
             set({ turnTimerInterval: newInterval });
           }
         });
-
         newSocket.on("error", (error) => {
           // Handles fatal errors
           console.error("Fatal Server Error:", error.message);
@@ -356,26 +390,23 @@ export const useGameStore = create<GameState>()(
           get().resetGame();
         });
         newSocket.on("disconnect", (reason) => {
+          console.log("Socket disconnected:", reason);
+          if (get().turnTimerInterval) clearInterval(get().turnTimerInterval!);
+          set({ socket: null, isLoading: false });
+          // If the server forced the disconnect, it's a critical error.
           if (reason === "io server disconnect") {
-            console.warn("Disconnected by server, resetting session.");
-            resetGame();
+            get().resetGame();
           }
-          set({ isLoading: false, socket: null });
         });
-
         newSocket.on("game_warning", (data) => {
           // Show the error message without disconnecting or resetting the game
           get().setErrorMessage(data.message);
         });
-
         newSocket.on("error", (error) => {
-          set({
-            isLoading: false,
-            errorMessage:
-              error.message || "An unknown connection error occurred.",
-          });
+          console.error("Fatal Server Error:", error.message);
+          get().setErrorMessage(error.message || "A critical error occurred.");
+          get().resetGame();
         });
-
         newSocket.on("match_found", (data) => {
           console.log("Match has been found!", data);
           set({
@@ -384,7 +415,6 @@ export const useGameStore = create<GameState>()(
             isLoading: false,
           });
         });
-
         newSocket.on("game_started", (data) => {
           if (get().turnTimerInterval) clearInterval(get().turnTimerInterval!);
           set({
@@ -483,7 +513,8 @@ export const useGameStore = create<GameState>()(
               },
             ],
             maskedWord: data.maskedWord,
-            attemptsLeft: data.attemptsLeft,
+            // FIX: Add this line to update the mistakes
+            playerMistakes: data.playerMistakes,
           }));
         });
         newSocket.on("turn_update", (data) => {
@@ -508,7 +539,6 @@ export const useGameStore = create<GameState>()(
 
           set({ turnTimerInterval: newInterval });
         });
-
         newSocket.on("game_over", (data) => {
           if (get().turnTimerInterval) {
             clearInterval(get().turnTimerInterval!);

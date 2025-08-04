@@ -61,6 +61,13 @@ const PlayerItem: React.FC<PlayerItemProps> = ({
 
   const avatarStyle = {
     backgroundImage: `url(${avatarUrl})`,
+    // --- REPLACE THE OLD STYLE WITH THIS ---
+    aspectRatio: "1 / 1", // This forces the container to be a perfect square
+    width: "100%", // Allow the parent to control the size
+    height: "100%",
+    borderRadius: "50%",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
   };
 
   return (

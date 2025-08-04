@@ -2,6 +2,7 @@
 import React from "react";
 import { useGameStore } from "@/app/stores/useGameStore";
 import { useShallow } from "zustand/react/shallow";
+import { BsBoxArrowUpRight } from "react-icons/bs";
 
 function RewardStatus({
   status,
@@ -11,9 +12,7 @@ function RewardStatus({
   signature: string | null;
 }) {
   if (status === "pending") {
-    return (
-      <p className="win-modal-reward-status pending">Awaiting Reward...</p>
-    );
+    return <p className="win-modal-reward-status pending"></p>;
   }
   if (status === "sent" && signature) {
     return (
@@ -22,8 +21,12 @@ function RewardStatus({
         target="_blank"
         rel="noopener noreferrer"
         className="win-modal-reward-status sent"
+        style={{
+          zIndex: 9999,
+          color: "white",
+        }}
       >
-        Reward Sent ✔ (View Transaction)
+        <BsBoxArrowUpRight />
       </a>
     );
   }
@@ -32,7 +35,6 @@ function RewardStatus({
 
 export default function WinModal() {
   const {
-    resetGame,
     winner,
     currentUser,
     entryFee,
@@ -40,9 +42,9 @@ export default function WinModal() {
     rewardStatus,
     resetGameState,
     rewardTxSignature,
+    setWinModalOpen,
   } = useGameStore(
     useShallow((state) => ({
-      resetGame: state.resetGame,
       winner: state.winner,
       currentUser: state.username,
       entryFee: state.entryFee,
@@ -50,6 +52,7 @@ export default function WinModal() {
       rewardStatus: state.rewardStatus,
       rewardTxSignature: state.rewardTxSignature,
       resetGameState: state.resetGameState,
+      setWinModalOpen: state.setWinModalOpen,
     }))
   );
 
@@ -95,7 +98,10 @@ export default function WinModal() {
         )}
 
         <button
-          onClick={resetGame}
+          onClick={() => {
+            resetGameState();
+            setWinModalOpen(false);
+          }}
           className="jsx-7a5051b5ea0cbf35 win-modal-button"
           disabled={isButtonDisabled}
           style={{ zIndex: 10, position: "relative" }} // z-index fix

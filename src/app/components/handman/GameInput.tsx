@@ -22,7 +22,9 @@ export default function GameInput({ onSendMessage, onGuess }: GameInputProps) {
   const [inputValue, setInputValue] = useState("");
   const { isMyTurn, gameMode } = useGameStore(
     useShallow((state) => ({
+      // FIX: The logic now checks if the game mode is solo.
       isMyTurn:
+        state.gameMode === "solo" || // It's always your turn in solo mode
         state.username.toLowerCase() === state.currentTurnPlayer?.toLowerCase(),
       gameMode: state.gameMode,
     }))

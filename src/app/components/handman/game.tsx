@@ -47,7 +47,7 @@ export default function Game() {
 
   const handleExitClick = () => {
     // Instead of changing the view, show an error.
-    setErrorMessage("You must forfeit the game to quit. (Feature coming soon)");
+    setErrorMessage("You must finish the game to quit.");
   };
 
   return (

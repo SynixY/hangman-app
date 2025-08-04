@@ -3,10 +3,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { useGameStore } from "@/app/stores/useGameStore"; // Adjust path to your store
 import MiniTutorialSteps from "./mini-tutorial-steps";
 import { useShallow } from "zustand/shallow";
+import { MdOutlineFileUpload } from "react-icons/md";
+import useIsMobile from "@/app/hooks/useIsMobile";
 
 export default function HomeCenter() {
   // Use local state for the input field
-
+  const IsMobile = useIsMobile(640);
   const {
     login,
     errorMessage,
@@ -61,14 +63,29 @@ export default function HomeCenter() {
             <section className="jsx-d0e8374e17477ac4">
               <div className="jsx-263140084 avatar">
                 <span
-                  className="jsx-263140084"
-                  style={{ backgroundImage: `url(${avatarUrl})` }}
+                  style={{
+                    // --- REPLACE THE OLD STYLE WITH THIS ---
+                    aspectRatio: "1 / 1", // This forces the container to be a perfect square
+                    width: "100%", // Allow the parent to control the size
+                    height: "100%",
+                    borderRadius: "50%",
+                    backgroundImage: `url(${avatarUrl})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
                 />
                 <button
                   type="button"
                   className="jsx-263140084"
                   onClick={() => fileInputRef.current?.click()}
-                />
+                >
+                  <MdOutlineFileUpload
+                    style={{
+                      fontSize: IsMobile ? "24px" : "32px",
+                      color: "#301a6b",
+                    }}
+                  />
+                </button>
                 <input
                   type="file"
                   ref={fileInputRef}

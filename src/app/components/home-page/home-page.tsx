@@ -1,44 +1,71 @@
-"use client"; // This component now uses hooks, so it must be a client component.
-
+"use client";
 import React from "react";
 import LogoTopBar from "./logo-top-bar";
 import HomeCenter from "./home-center";
 import Footer from "./footer";
-import useResponsiveScale from "../../hooks/useResponsiveScale"; // Adjust path if needed
-import useIsMobile from "../../hooks/useIsMobile"; // Adjust path if needed
-import { useGameStore } from "@/app/stores/useGameStore"; // Adjust path if needed
+import useResponsiveScale from "../../hooks/useResponsiveScale";
+import useIsMobile from "../../hooks/useIsMobile";
+import { useGameStore } from "@/app/stores/useGameStore";
+import GameSelector from "./game-selector";
 
 function Home() {
   const scale = useResponsiveScale(1300);
-  const isMobile = useIsMobile(640);
+  const isMobile = useIsMobile(800);
   const setIsTutorialOpen = useGameStore((state) => state.setIsTutorialOpen);
 
+  // If it's mobile, render the original, clean layout
+  if (isMobile) {
+    return (
+      <>
+        <div id="content" className="jsx-c2cb53106fc23b05 jsx-3140246774">
+          <div
+            style={{ transform: `scale(1.0)` }}
+            className="jsx-c2cb53106fc23b05 jsx-3140246774 screen"
+          >
+            <div className="jsx-d0e8374e17477ac4 start">
+              <div className="jsx-ddf51313b1730fe4 hamburguer"></div>
+              <LogoTopBar />
+              <button
+                className="jsx-d0e8374e17477ac4 infos"
+                onClick={() => setIsTutorialOpen(true)}
+              ></button>
+              <HomeCenter />
+              <Footer />
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // If it's desktop, render the new layout with the sidebar
   return (
     <>
-      {/*<div className="jsx-b6582d438744e10b side">
-        <div id="garticphone-com_160x600"></div>
-      </div>*/}
-      <div id="content" className="jsx-c2cb53106fc23b05 jsx-3140246774">
-        <div
-          style={{ transform: `scale(${!isMobile ? scale : 1.0})` }}
-          className="jsx-c2cb53106fc23b05 jsx-3140246774 screen"
-        >
-          <div className="jsx-d0e8374e17477ac4 start">
-            {isMobile ? (
-              <>
-                <div className="jsx-ddf51313b1730fe4 hamburguer"></div>
-                <LogoTopBar />
-                <button
-                  className="jsx-d0e8374e17477ac4 infos"
-                  onClick={() => setIsTutorialOpen(true)}
-                ></button>
-              </>
-            ) : (
-              // On desktop, show the full top bar
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "280px 1fr",
+          height: "100vh",
+          width: "100%",
+          alignItems: "center",
+        }}
+      >
+        {/* Column 1: The Game Selector (Desktop Only) */}
+        <div style={{ height: "100%", alignSelf: "stretch" }}>
+          <GameSelector />
+        </div>
+
+        {/* Column 2: Main Content */}
+        <div id="content" className="jsx-c2cb53106fc23b05 jsx-3140246774">
+          <div
+            style={{ transform: `scale(${scale})` }}
+            className="jsx-c2cb53106fc23b05 jsx-3140246774 screen"
+          >
+            <div className="jsx-d0e8374e17477ac4 start">
               <LogoTopBar />
-            )}
-            <HomeCenter />
-            <Footer />
+              <HomeCenter />
+              <Footer />
+            </div>
           </div>
         </div>
       </div>

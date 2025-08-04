@@ -34,13 +34,17 @@ export default function PredefinedGame() {
                 gameMode === "solo" ? "checked" : ""
               }`}
             >
-              <figure className="jsx-d3664381b88289ba jsx-1668173960 ic_freestyle" />
+              <figure
+                className="jsx-d3664381b88289ba jsx-1668173960 ic_freestyle"
+                style={{ backgroundImage: `url("/images/soloMode.png")` }}
+              />
               <section className="jsx-d3664381b88289ba jsx-1668173960 description">
                 <h4 className="jsx-d3664381b88289ba jsx-1668173960">
                   SOLO MODE
                 </h4>
                 <p className="jsx-d3664381b88289ba jsx-1668173960">
-                  Practice by yourself. This mode is free to play.
+                  Try to guess the word in a limited time. Reward a 2x of your
+                  Wager fee.
                 </p>
               </section>
             </div>

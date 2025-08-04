@@ -15,14 +15,13 @@ export default function Scrapbook() {
     submitGuess,
     sendChatMessage,
     maskedWord,
-    attemptsLeft,
     maxAttempts,
     turnTime,
     turnTimeLeft,
     turnNumber,
     playerMistakes,
     maxPlayerMistakes,
-    gameMode, // Add this
+    gameMode,
     currentTurnPlayer,
   } = useGameStore(
     useShallow((state) => ({
@@ -31,7 +30,6 @@ export default function Scrapbook() {
       submitGuess: state.submitGuess,
       sendChatMessage: state.sendChatMessage,
       maskedWord: state.maskedWord,
-      attemptsLeft: state.attemptsLeft,
       maxAttempts: state.maxAttempts,
       turnTime: state.turnTime,
       turnTimeLeft: state.turnTimeLeft,
@@ -39,7 +37,7 @@ export default function Scrapbook() {
       playerMistakes: state.playerMistakes,
       maxPlayerMistakes: state.maxPlayerMistakes,
       currentTurnPlayer: state.currentTurnPlayer,
-      gameMode: state.gameMode, // Add this
+      gameMode: state.gameMode,
     }))
   );
 
@@ -49,12 +47,20 @@ export default function Scrapbook() {
     }
   }, [messages]);
 
-  const mistakes = maxAttempts - attemptsLeft;
+  const mistakes = Object.values(playerMistakes).reduce((a, b) => a + b, 0);
   const currentPlayerMistakes =
     (currentTurnPlayer && playerMistakes[currentTurnPlayer]) || 0;
 
   return (
-    <div className="jsx-380c8a0d0db173e2 scrapbook">
+    <div
+      className="jsx-380c8a0d0db173e2 scrapbook"
+      style={{
+        flexGrow: 1, // This allows the scrapbook to expand
+        display: "flex",
+        flexDirection: "column",
+        minHeight: 0,
+      }}
+    >
       <Hangman
         word={maskedWord}
         mistakes={mistakes}
@@ -89,7 +95,7 @@ export default function Scrapbook() {
               </div>
               <div className="jsx-3560981401 scrollBar" />
             </div>
-          </div>{" "}
+          </div>
         </>
       )}
 

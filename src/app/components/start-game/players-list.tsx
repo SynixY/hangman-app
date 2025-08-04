@@ -43,7 +43,7 @@ export default function PlayersList() {
   return (
     <div className="jsx-5f9af3a98e99b444 left">
       {/* This dropdown is now always visible */}
-      <span className="jsx-5f9af3a98e99b444">
+      {/*<span className="jsx-5f9af3a98e99b444">
         <label className="jsx-833d62ffcae7f9f select">
           <select className="jsx-833d62ffcae7f9f" defaultValue={maxPlayers}>
             <option value="4" className="jsx-833d62ffcae7f9f">
@@ -54,7 +54,7 @@ export default function PlayersList() {
             </option>
           </select>
         </label>
-      </span>
+      </span>*/}
       <div className="jsx-5f9af3a98e99b444 users">
         <div className="jsx-6c5c34bf46e1a27 players">
           {/* Always use the 'scroll' class and include the scrollbar */}
