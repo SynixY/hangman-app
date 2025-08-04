@@ -4,7 +4,7 @@ import { persist, PersistOptions } from "zustand/middleware";
 import { io, Socket } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 
-const BACKEND_URL = "https://9yfbbh3enhk8ll-8000.proxy.runpod.net"; //"http://localhost:8000 ";
+const BACKEND_URL = "http://localhost:8000"; //" ";https://9yfbbh3enhk8ll-8000.proxy.runpod.net
 
 type Player = {
   username: string;
@@ -89,33 +89,26 @@ interface GameState {
 
 type PersistedState = Pick<GameState, "jwt" | "username" | "avatarUrl">;
 
-const persistOptions: PersistOptions<GameState, PersistedState> = {
+const persistOptions: PersistOptions<GameState, PersistState> = {
   name: "hangman-game-storage",
   partialize: (state) => ({
     jwt: state.jwt,
     username: state.username,
     avatarUrl: state.avatarUrl,
   }),
-
-  onRehydrateStorage: () => (state, error) => {
-    if (error) {
-      console.error("An error occurred during storage rehydration:", error);
-      return;
-    }
-    if (state && state.jwt) {
+  onRehydrateStorage: () => (state) => {
+    if (state?.jwt) {
       try {
-        const decoded: { exp: number } = jwtDecode(state.jwt);
-        // If the token from storage is expired, reset everything.
-        if (Date.now() >= decoded.exp * 1000) {
-          console.log("Persisted token is expired. Clearing session.");
-          state.resetGame();
+        const decoded = jwtDecode(state.jwt) as { exp: number };
+        if (Date.now() < decoded.exp * 1000) {
+          // If the token is valid, immediately try to reconnect the socket.
+          console.log("Valid session found, attempting to reconnect...");
+          state.connectSocket();
         } else {
-          // FIX: If the session is valid, send the user directly to the lobby.
-          console.log("Valid session rehydrated. Moving to lobby.");
-          state.setView("lobby");
+          // If token is expired, reset the state.
+          state.resetGame();
         }
       } catch (e) {
-        console.error("Failed to decode persisted JWT. Clearing session.", e);
         state.resetGame();
       }
     }
@@ -269,17 +262,12 @@ export const useGameStore = create<GameState>()(
           clearInterval(get().turnTimerInterval!);
         }
         set({
-          view: "lobby", // Go back to the lobby, not home
           socket: null,
           isLoading: false,
           roomId: null,
           players: [],
           messages: [],
-          winner: null,
-          maskedWord: "",
-          secretWord: "",
           turnTimerInterval: null,
-          // IMPORTANT: We DO NOT clear jwt, username, or avatarUrl here.
         });
       },
 
@@ -300,7 +288,47 @@ export const useGameStore = create<GameState>()(
         set({ socket: newSocket });
 
         newSocket.on("connect", () => {
-          console.log("Socket connected, waiting for match...");
+          console.log("Socket connected. Requesting current room state...");
+          // FIX: Immediately ask the server for the current game state.
+          newSocket.emit("request_room_state");
+          set({ isLoading: false });
+        });
+
+        // FIX: This new handler will restore your game state after a refresh.
+        newSocket.on("full_room_state", (data) => {
+          console.log("Received full room state:", data);
+          if (!data) {
+            // If server sends null, it means we are not in a room.
+            set({ view: "lobby" });
+            return;
+          }
+
+          if (data.state === "waiting_for_payment") {
+            const { sub: myPlayerId } = jwtDecode(get().jwt!) as {
+              sub: string;
+            };
+            const myPaymentInfo = data.players.find(
+              (p: any) => p.playerId === myPlayerId
+            );
+
+            set({
+              isPaymentModalOpen: true,
+              paymentTimeout: data.paymentTimeout,
+              entryFee: data.entryFee,
+              roomId: data.roomId,
+              players: data.players,
+              currentUserPeelWallet: myPaymentInfo?.peelWalletAddress,
+            });
+          } else if (data.state === "playing") {
+            set({
+              view: "game",
+              isPaymentModalOpen: false,
+              roomId: data.roomId,
+              players: data.players,
+              maskedWord: data.maskedWord,
+              // ... (and all other relevant game state properties)
+            });
+          }
         });
 
         newSocket.on("error", (errorData) => {
@@ -357,6 +385,18 @@ export const useGameStore = create<GameState>()(
             turnTime: data.turnTime,
             turnTimeLeft: data.turnTime,
           });
+
+          if (data.gameMode === "solo" || data.gameMode === "multiplayer") {
+            if (get().turnTimerInterval)
+              clearInterval(get().turnTimerInterval!);
+
+            const newInterval = setInterval(() => {
+              set((state) => ({
+                turnTimeLeft: Math.max(0, state.turnTimeLeft - 1),
+              }));
+            }, 1000);
+            set({ turnTimerInterval: newInterval });
+          }
         });
         newSocket.on("payment_required", (data) => {
           // FIX: Correctly decode the 'sub' (subject/user ID) claim from the JWT.
@@ -420,7 +460,6 @@ export const useGameStore = create<GameState>()(
             ],
             maskedWord: data.maskedWord,
             attemptsLeft: data.attemptsLeft,
-            avatarUrl: data.avatarUrl,
           }));
         });
         newSocket.on("turn_update", (data) => {
@@ -447,17 +486,13 @@ export const useGameStore = create<GameState>()(
         });
 
         newSocket.on("game_over", (data) => {
+          if (get().turnTimerInterval) {
+            clearInterval(get().turnTimerInterval!);
+          }
           if (data.reason == "Payment timeout") {
             get().setErrorMessage(
               "Payment timeout, you will get refunded automatically"
             );
-            set({
-              view: "lobby",
-              turnTimerInterval: null,
-              isPaymentModalOpen: false,
-              currentUserPeelWallet: null,
-              players: [],
-            });
             return;
           }
           const isWinner = data.winner?.username === get().username;

@@ -38,6 +38,7 @@ export default function WinModal() {
     entryFee,
     secretWord,
     rewardStatus,
+    resetGameState,
     rewardTxSignature,
   } = useGameStore(
     useShallow((state) => ({
@@ -48,6 +49,7 @@ export default function WinModal() {
       secretWord: state.secretWord,
       rewardStatus: state.rewardStatus,
       rewardTxSignature: state.rewardTxSignature,
+      resetGameState: state.resetGameState,
     }))
   );
 

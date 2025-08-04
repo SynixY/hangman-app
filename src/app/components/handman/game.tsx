@@ -7,10 +7,11 @@ import { useShallow } from "zustand/shallow";
 
 export default function Game() {
   const [isMobile, setIsMobile] = useState(false);
-  const { setView, setErrorMessage } = useGameStore(
+  const { setView, setErrorMessage, gameMode } = useGameStore(
     useShallow((state) => ({
       setView: state.setView,
       setErrorMessage: state.setErrorMessage,
+      gameMode: state.gameMode,
     }))
   );
 
@@ -74,7 +75,7 @@ export default function Game() {
               </>
             )}
             <div className="jsx-380c8a0d0db173e2 center">
-              <Players />
+              {gameMode !== "solo" && <Players />}
               <Scrapbook />
             </div>
           </div>

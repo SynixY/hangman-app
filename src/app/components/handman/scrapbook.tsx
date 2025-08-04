@@ -22,6 +22,7 @@ export default function Scrapbook() {
     turnNumber,
     playerMistakes,
     maxPlayerMistakes,
+    gameMode, // Add this
     currentTurnPlayer,
   } = useGameStore(
     useShallow((state) => ({
@@ -38,6 +39,7 @@ export default function Scrapbook() {
       playerMistakes: state.playerMistakes,
       maxPlayerMistakes: state.maxPlayerMistakes,
       currentTurnPlayer: state.currentTurnPlayer,
+      gameMode: state.gameMode, // Add this
     }))
   );
 
@@ -64,28 +66,32 @@ export default function Scrapbook() {
         maxPlayerMistakes={maxPlayerMistakes}
       />
 
-      <h4 className="jsx-8a159d9480957b3c">GAME CHAT</h4>
-      <div className="jsx-380c8a0d0db173e2 timeline">
-        <div className="jsx-3560981401 scroll">
-          <div
-            ref={scrollRef}
-            className="jsx-3560981401 scrollElements"
-            style={{ overflowY: "auto", padding: "10px 0" }}
-          >
-            {messages.map((msg, index) => (
-              <ChatMessage
-                key={index}
-                external={msg.username !== username}
-                username={msg.username}
-                message={msg.message}
-                isGuess={msg.isGuess}
-                avatarUrl={msg.avatarUrl ?? "/images/avatar/1.png"}
-              />
-            ))}
-          </div>
-          <div className="jsx-3560981401 scrollBar" />
-        </div>
-      </div>
+      {gameMode !== "solo" && (
+        <>
+          <h4 className="jsx-8a159d9480957b3c">GAME CHAT</h4>
+          <div className="jsx-380c8a0d0db173e2 timeline">
+            <div className="jsx-3560981401 scroll">
+              <div
+                ref={scrollRef}
+                className="jsx-3560981401 scrollElements"
+                style={{ overflowY: "auto", padding: "10px 0" }}
+              >
+                {messages.map((msg, index) => (
+                  <ChatMessage
+                    key={index}
+                    external={msg.username !== username}
+                    username={msg.username}
+                    message={msg.message}
+                    isGuess={msg.isGuess}
+                    avatarUrl={msg.avatarUrl ?? "/images/avatar/1.png"}
+                  />
+                ))}
+              </div>
+              <div className="jsx-3560981401 scrollBar" />
+            </div>
+          </div>{" "}
+        </>
+      )}
 
       <GameInput onSendMessage={sendChatMessage} onGuess={submitGuess} />
     </div>

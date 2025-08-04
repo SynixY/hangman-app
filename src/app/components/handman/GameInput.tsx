@@ -20,10 +20,11 @@ interface GameInputProps {
 
 export default function GameInput({ onSendMessage, onGuess }: GameInputProps) {
   const [inputValue, setInputValue] = useState("");
-  const { isMyTurn } = useGameStore(
+  const { isMyTurn, gameMode } = useGameStore(
     useShallow((state) => ({
       isMyTurn:
         state.username.toLowerCase() === state.currentTurnPlayer?.toLowerCase(),
+      gameMode: state.gameMode,
     }))
   );
 
@@ -63,9 +64,11 @@ export default function GameInput({ onSendMessage, onGuess }: GameInputProps) {
         maxLength={30}
       />
       <div className="game-input-actions" style={{ display: "flex" }}>
-        <button className="jsx-1e5748a2310b0bd small" onClick={handleSend}>
-          <strong>Chat</strong>
-        </button>
+        {gameMode !== "solo" && (
+          <button className="jsx-1e5748a2310b0bd small" onClick={handleSend}>
+            <strong>Chat</strong>
+          </button>
+        )}
         {isMyTurn && (
           <button
             className="jsx-1e5748a2310b0bd small"
