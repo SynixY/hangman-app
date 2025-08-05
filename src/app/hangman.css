@@ -885,7 +885,7 @@
     transform: scale(1);
   }
   50% {
-    transform: scale(1.08);
+    transform: scale(1.02);
   }
   100% {
     transform: scale(1);
@@ -894,7 +894,7 @@
 
 .user.is-turn {
   animation: turn-pulse 1.2s ease-in-out;
-  border: 2px solid #5cffb6;
+  border: 2px solid #7661c9;
   color: #301a6b; /* Change text color for contrast */
 }
 

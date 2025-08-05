@@ -14,7 +14,7 @@ export default function Players() {
 
   return (
     <div className="jsx-27c6a713a0669d29 players">
-      <h4 className="jsx-8a159d9480957b3c">GAMBLERS</h4>
+      <h4 className="jsx-8a159d9480957b3c">PLAYERS</h4>
       <div className="jsx-27c6a713a0669d29 list">
         <div className="jsx-3560981401 scroll">
           <div className="jsx-3560981401 scrollElements">

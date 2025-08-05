@@ -12,6 +12,15 @@ type Player = {
   avatarUrl?: string;
 };
 
+interface GameModeInfo {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  mode: "solo" | "multiplayer";
+  difficulty: "easy" | "hard";
+}
+
 const getRemainingSeconds = (
   startTime: number | undefined,
   totalDuration: number
@@ -51,6 +60,7 @@ interface GameState {
   currentUserPeelWallet: string | null;
   entryFee: number;
   paymentTimeout: number;
+  paymentStartTime: number | null; // Add this
   wordLength: number;
   attemptsLeft: number;
   maxAttempts: number;
@@ -84,6 +94,8 @@ interface GameState {
   submitGuess: (guess: string) => void;
   sendChatMessage: (message: string) => void;
   login: (username: string) => Promise<void>;
+  availableGameModes: GameModeInfo[];
+  fetchGameModes: () => Promise<void>;
   startMatchmaking: () => void;
   cancelMatchmaking: () => void;
   setErrorMessage: (message: string) => void;
@@ -150,7 +162,7 @@ export const useGameStore = create<GameState>()(
       currentTurnPlayer: null,
       turnNumber: 1,
       playerMistakes: {},
-      maxPlayerMistakes: 3,
+      maxPlayerMistakes: 6,
       players: [],
       currentUserPeelWallet: null,
       entryFee: 0,
@@ -158,6 +170,7 @@ export const useGameStore = create<GameState>()(
       wordLength: 0,
       attemptsLeft: 0,
       maxAttempts: 6,
+      paymentStartTime: null,
       maskedWord: "",
       messages: [],
       winner: null,
@@ -166,6 +179,7 @@ export const useGameStore = create<GameState>()(
       rewardTxSignature: null,
       avatarUrl: "/images/avatar/1.png",
       turnTimerInterval: null,
+      availableGameModes: [],
 
       // --- ACTIONS ---
       setIsTutorialOpen: (isOpen) => set({ isTutorialOpen: isOpen }),
@@ -264,7 +278,6 @@ export const useGameStore = create<GameState>()(
         // FIX: This is now the ONLY place that tells the server to start a game.
         socket.emit("start_matchmaking", { difficulty, gameMode });
       },
-
       cancelMatchmaking: () => {
         const { socket } = get();
         // Send the cancel event to the server
@@ -272,7 +285,6 @@ export const useGameStore = create<GameState>()(
         // Immediately update the UI
         set({ isLoading: false });
       },
-
       resetGame: () => {
         if (get().turnTimerInterval) {
           clearInterval(get().turnTimerInterval!);
@@ -308,7 +320,6 @@ export const useGameStore = create<GameState>()(
           turnTimerInterval: null,
         });
       },
-
       connectSocket: () => {
         const { jwt, socket } = get();
         // Prevent reconnecting if a socket already exists or if not logged in.
@@ -338,10 +349,8 @@ export const useGameStore = create<GameState>()(
 
             set({
               isPaymentModalOpen: true,
-              paymentTimeout: getRemainingSeconds(
-                data.paymentStartTime,
-                data.paymentTimeout
-              ),
+              paymentTimeout: data.paymentTimeout, // Store total duration
+              paymentStartTime: data.paymentStartTime, // Store start time
               entryFee: data.entryFee,
               roomId: data.roomId,
               players: data.players,
@@ -366,6 +375,7 @@ export const useGameStore = create<GameState>()(
               attemptsLeft: data.attemptsLeft,
               currentTurnPlayer: data.currentTurnPlayer,
               turnStartTime: data.turnStartTime,
+              messages: data.messages || [],
               isPaymentModalOpen: false,
               turnTimeLeft: getRemainingSeconds(
                 data.turnStartTime,
@@ -461,10 +471,8 @@ export const useGameStore = create<GameState>()(
             isPaymentModalOpen: true,
             isLoading: false,
             entryFee: data.fee,
-            paymentTimeout: getRemainingSeconds(
-              data.paymentStartTime,
-              data.timeoutSeconds
-            ),
+            paymentTimeout: data.timeoutSeconds, // Store total duration
+            paymentStartTime: data.paymentStartTime, // Store start time
             // This will now correctly be the unique wallet for the current player
             currentUserPeelWallet: myPaymentInfo?.peelWalletAddress,
             players: data.players.map((p: any) => ({
@@ -605,8 +613,19 @@ export const useGameStore = create<GameState>()(
           set({ isLoading: false });
         }
       },
-
-      // These actions are simple setters now, cleanup is handled by resetGame
+      fetchGameModes: async () => {
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/game-modes`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch game modes.");
+          }
+          const data = await response.json();
+          set({ availableGameModes: data });
+        } catch (error: any) {
+          console.error("Error fetching game modes:", error);
+          get().setErrorMessage(error.message);
+        }
+      },
       setPaymentModalOpen: (isOpen) => set({ isPaymentModalOpen: isOpen }),
       setCountdownModalOpen: (isOpen) => set({ isCountdownModalOpen: isOpen }),
       submitGuess: (guess) => {

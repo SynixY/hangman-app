@@ -2,11 +2,10 @@
 import React, { useState } from "react";
 import { useGameStore } from "@/app/stores/useGameStore";
 import { useShallow } from "zustand/react/shallow";
-import Time from "./countdown-timer"; // Using the new Time component
+import Time from "./countdown-timer";
 import useIsMobile from "../hooks/useIsMobile";
 import PlayerItem from "./player-item";
 
-// A utility function to shorten the wallet address
 const truncateAddress = (address: string | null) => {
   if (!address) return "";
   return `${address.substring(0, 8)}...${address.substring(
@@ -16,25 +15,36 @@ const truncateAddress = (address: string | null) => {
 
 export default function PaymentModal() {
   const [copied, setCopied] = useState(false);
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(800);
+
   const {
     isPaymentModalOpen,
-
     paymentTimeout,
     currentUserPeelWallet,
     entryFee,
     username,
     players,
+    paymentStartTime,
+    availableGameModes,
+    gameMode,
+    difficulty,
   } = useGameStore(
     useShallow((state) => ({
       isPaymentModalOpen: state.isPaymentModalOpen,
-      setPaymentModalOpen: state.setPaymentModalOpen,
       paymentTimeout: state.paymentTimeout,
       entryFee: state.entryFee,
       currentUserPeelWallet: state.currentUserPeelWallet,
       players: state.players,
       username: state.username,
+      paymentStartTime: state.paymentStartTime,
+      availableGameModes: state.availableGameModes,
+      gameMode: state.gameMode,
+      difficulty: state.difficulty,
     }))
+  );
+
+  const currentGameModeDetails = availableGameModes.find(
+    (m) => m.mode === gameMode && m.difficulty === difficulty
   );
 
   const handleCopy = () => {
@@ -50,127 +60,122 @@ export default function PaymentModal() {
     return null;
   }
 
-  const paidPlayersCount = players.filter((p) => p.has_paid).length;
-  const totalPlayers = players.length;
-
-  const playerStyleBase = {
-    display: "flex",
-    alignItems: "center",
-    padding: "10px",
-    borderRadius: "10px",
-    margin: "5px 0",
-    width: "100%",
-  };
-
-  const waitingStyle = {
-    ...playerStyleBase,
-    backgroundColor: "#f0f0f5", // A more subtle light gray
-  };
-
-  const paidStyle = {
-    ...playerStyleBase,
-    backgroundColor: "#d4f5e5",
-  };
-
-  return (
-    <div
-      className="jsx-2835833729 background fade-enter-done"
-      style={{ zIndex: 100 }}
-    >
+  const renderDesktopLayout = () => (
+    <>
+      <div style={{ position: "absolute", top: "15px", right: "30px" }}>
+        {paymentTimeout > 0 && (
+          <Time totalDuration={paymentTimeout} startTime={paymentStartTime} />
+        )}
+      </div>
+      <h2
+        className="jsx-585ea3472e396a52"
+        style={{ color: "#301a6b", marginBottom: "1.5rem" }}
+      >
+        PAYMENT REQUIRED
+      </h2>
       <div
-        className="jsx-2835833729 content"
         style={{
-          width: isMobile ? "100%" : "650px",
-          height: isMobile ? "100%" : "auto",
-          borderRadius: isMobile ? "0" : "12px",
-          transform: "scale(1.0)",
-          display: "flex",
-          flexDirection: "column",
+          display: "grid",
+          gridTemplateColumns: "350px 1fr",
+          gap: "2rem",
+          width: "100%",
+          flex: 1,
+          alignItems: "start",
         }}
       >
-        {/* Timer positioned at the top right */}
-        <div style={{ position: "absolute", top: "15px", right: "50px" }}>
-          {paymentTimeout > 0 && <Time initialSeconds={paymentTimeout} />}
-        </div>
-
-        <h2 className="jsx-585ea3472e396a52">
-          PAYMENT REQUIRED
-          <i className="jsx-ff9a91141b223811">
-            <span className="jsx-3e55f1c85815f7f6 tooltip">
-              Make sure to send the exact amount
-            </span>
-          </i>
-        </h2>
-
-        <div className="jsx-5f9af3a98e99b444 users">
-          <div className="jsx-6c5c34bf46e1a27 players">
-            {/* Always use the 'scroll' class and include the scrollbar */}
-            <div className="jsx-2980934243 scroll">
-              <div className="jsx-2980934243 scrollElements">
-                {players.map((player) => {
-                  const isPaid = player.has_paid;
-                  return (
-                    <PlayerItem
-                      key={player.username}
-                      username={player.username}
-                      avatarUrl={player.avatarUrl}
-                      viewMode={isMobile ? "compact" : "full"}
-                      backgroundColor={
-                        !isMobile ? (isPaid ? "#d4f5e5" : "#f0f0f5") : undefined
-                      }
-                      isOwner={player.username == username}
-                      statusText={
-                        !isMobile
-                          ? isPaid
-                            ? "Paid ✔"
-                            : "Waiting for payment..."
-                          : null
-                      }
-                      statusIndicatorColor={
-                        isMobile ? (isPaid ? "#22c55e" : "#ef4444") : undefined
-                      }
-                    />
-                  );
-                })}
-              </div>
-              <div className="jsx-2980934243 scrollBar">
-                <div
-                  className="jsx-2980934243 scrollTrack"
-                  style={{ top: "4px" }}
-                ></div>
-              </div>
-            </div>
+        {/* Column 1: Players List */}
+        <div
+          style={{ width: "100%", display: "flex", flexDirection: "column" }}
+        >
+          <h3
+            style={{
+              fontFamily: '"Black", sans-serif',
+              color: "#301a6b",
+              textAlign: "center",
+              marginBottom: "1rem",
+            }}
+          >
+            PLAYERS
+          </h3>
+          <div
+            className="users"
+            style={{
+              maxHeight: "350px",
+              overflowY: "auto",
+              backgroundColor: "rgba(38, 28, 92, 0.05)",
+              borderRadius: "10px",
+              padding: "5px",
+            }}
+          >
+            {players.map((player) => (
+              <PlayerItem
+                key={player.username}
+                username={player.username}
+                avatarUrl={player.avatarUrl}
+                viewMode={"full"}
+                isOwner={player.username === username}
+                statusText={player.has_paid ? "Paid ✔" : "Waiting..."}
+                backgroundColor={player.has_paid ? "#d4f5e5" : "#f0f0f5"}
+              />
+            ))}
           </div>
         </div>
-
-        {/* --- Main Content Area (Column Layout) --- */}
+        {/* Column 2: Game Details & Payment Info */}
         <div
           style={{
-            width: "100%",
-            flex: 1,
             display: "flex",
             flexDirection: "column",
-            minHeight: 0,
+            justifyContent: "center",
+            gap: "1.5rem",
+            paddingTop: "2.5rem",
           }}
         >
-          {/* Top Section: Payment Details */}
+          {currentGameModeDetails && (
+            <div
+              style={{
+                backgroundColor: "#f3f4f6",
+                borderRadius: "12px",
+                padding: "1rem",
+                textAlign: "center",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+              }}
+            >
+              <img
+                src={currentGameModeDetails.imageUrl}
+                alt={currentGameModeDetails.name}
+                style={{ width: "120px", height: "auto", margin: "0 auto" }}
+              />
+              <h4
+                style={{
+                  color: "#301a6b",
+                  fontFamily: '"Black", sans-serif',
+                  margin: "0.5rem 0",
+                }}
+              >
+                {currentGameModeDetails.name}
+              </h4>
+              <p
+                style={{
+                  color: "#444",
+                  fontSize: "12px",
+                  fontFamily: "Bold, sans-serif",
+                }}
+              >
+                {currentGameModeDetails.description}
+              </p>
+            </div>
+          )}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              justifyContent: "center",
-              alignContent: "center",
-              padding: isMobile ? "20px 10px" : "20px",
+              alignItems: "center",
               textAlign: "center",
             }}
           >
             <p
               className="jsx-72a234951d07662"
-              style={{
-                width: "100%",
-
-                fontFamily: '"Bold", sans-serif',
-              }}
+              style={{ fontFamily: '"Bold", sans-serif', color: "#444" }}
             >
               Send exactly <strong>{entryFee} SOL</strong> to this address:
             </p>
@@ -180,8 +185,8 @@ export default function PaymentModal() {
                 borderRadius: "8px",
                 padding: "10px",
                 margin: "10px auto",
-
-                maxWidth: "300px",
+                width: "100%",
+                maxWidth: "400px",
                 border: "2px solid #aca7c6",
                 wordBreak: "break-all",
               }}
@@ -190,11 +195,7 @@ export default function PaymentModal() {
                 {truncateAddress(currentUserPeelWallet) ?? "Loading address..."}
               </p>
             </div>
-            <div
-              style={{
-                width: "100%",
-              }}
-            >
+            <div>
               <button
                 onClick={handleCopy}
                 disabled={!currentUserPeelWallet || copied}
@@ -204,9 +205,158 @@ export default function PaymentModal() {
               </button>
             </div>
           </div>
-
-          {/* Bottom Section: Player List */}
         </div>
+      </div>
+    </>
+  );
+
+  const renderMobileLayout = () => (
+    <>
+      <div style={{ position: "absolute", top: "15px", right: "20px" }}>
+        {paymentTimeout > 0 && (
+          <Time totalDuration={paymentTimeout} startTime={paymentStartTime} />
+        )}
+      </div>
+
+      <h2
+        className="jsx-585ea3472e396a52"
+        style={{ color: "white", flexShrink: 0 }}
+      >
+        PAYMENT REQUIRED
+      </h2>
+
+      <div style={{ width: "100%", padding: "0 1rem", flexShrink: 0 }}>
+        <h3
+          style={{
+            fontFamily: '"Black", sans-serif',
+            color: "#5cffb6",
+            textAlign: "center",
+            textShadow: "2px 2px 0px rgb(23, 5, 87)",
+          }}
+        >
+          PLAYERS
+        </h3>
+        <div
+          className="users"
+          style={{ maxHeight: "120px", overflowY: "auto" }}
+        >
+          {players.map((player) => (
+            <PlayerItem
+              key={player.username}
+              username={player.username}
+              avatarUrl={player.avatarUrl}
+              viewMode="compact"
+              isOwner={player.username === username}
+              statusIndicatorColor={player.has_paid ? "#22c55e" : "#ef4444"}
+            />
+          ))}
+        </div>
+      </div>
+
+      {currentGameModeDetails && (
+        <div
+          style={{
+            backgroundColor: "white",
+            borderRadius: "12px",
+            padding: "1rem",
+            margin: "0 1rem",
+            textAlign: "center",
+            boxShadow: "0 0 15px rgba(255,255,255,0.3)",
+            flexShrink: 0,
+          }}
+        >
+          <img
+            src={currentGameModeDetails.imageUrl}
+            alt={currentGameModeDetails.name}
+            style={{ width: "120px", height: "auto", margin: "0 auto" }}
+          />
+          <h4
+            style={{
+              color: "#301a6b",
+              fontFamily: '"Black", sans-serif',
+              margin: "0.5rem 0",
+            }}
+          >
+            {currentGameModeDetails.name}
+          </h4>
+          <p
+            style={{
+              color: "#444",
+              fontSize: "12px",
+              fontFamily: "Bold, sans-serif",
+            }}
+          >
+            {currentGameModeDetails.description}
+          </p>
+        </div>
+      )}
+
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "1rem",
+          textAlign: "center",
+          flexShrink: 0,
+        }}
+      >
+        <p
+          className="jsx-72a234951d07662"
+          style={{ fontFamily: '"Bold", sans-serif', color: "white" }}
+        >
+          Send exactly <strong>{entryFee} SOL</strong> to this address:
+        </p>
+        <div
+          style={{
+            backgroundColor: "#e9e8f2",
+            borderRadius: "8px",
+            padding: "10px",
+            margin: "10px auto",
+            width: "100%",
+            maxWidth: "400px",
+            border: "2px solid #aca7c6",
+            wordBreak: "break-all",
+          }}
+        >
+          <p style={{ fontFamily: "monospace", color: "#301a6b" }}>
+            {truncateAddress(currentUserPeelWallet) ?? "Loading address..."}
+          </p>
+        </div>
+        <div>
+          <button
+            onClick={handleCopy}
+            disabled={!currentUserPeelWallet || copied}
+            className="jsx-7a5051b5ea0cbf35 big"
+          >
+            {copied ? "COPIED ✔" : "COPY ADDRESS"}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <div
+      className="jsx-2835833729 background fade-enter-done"
+      style={{ zIndex: 100 }}
+    >
+      <div
+        className="jsx-2835833729 content"
+        style={{
+          width: isMobile ? "100%" : "850px", // Made desktop wider
+          height: isMobile ? "100%" : "auto",
+          maxHeight: "90vh",
+          borderRadius: isMobile ? "0" : "12px",
+          transform: "scale(1.0)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: isMobile ? "space-around" : "flex-start",
+          padding: isMobile ? "0" : "25px 30px",
+        }}
+      >
+        {isMobile ? renderMobileLayout() : renderDesktopLayout()}
       </div>
     </div>
   );

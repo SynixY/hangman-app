@@ -74,13 +74,24 @@ export default function Scrapbook() {
 
       {gameMode !== "solo" && (
         <>
-          <h4 className="jsx-8a159d9480957b3c">GAME CHAT</h4>
-          <div className="jsx-380c8a0d0db173e2 timeline">
-            <div className="jsx-3560981401 scroll">
+          <div
+            className="jsx-380c8a0d0db173e2 timeline"
+            style={{ minHeight: "200px" }}
+          >
+            <div
+              className="jsx-3560981401 scroll"
+              style={{
+                height: "100%",
+              }}
+            >
               <div
                 ref={scrollRef}
                 className="jsx-3560981401 scrollElements"
-                style={{ overflowY: "auto", padding: "10px 0" }}
+                style={{
+                  overflowY: "auto",
+                  overflowX: "hidden",
+                  padding: "20px",
+                }}
               >
                 {messages.map((msg, index) => (
                   <ChatMessage

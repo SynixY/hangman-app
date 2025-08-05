@@ -3,36 +3,52 @@ import React, { useState, useEffect } from "react";
 import useIsMobile from "../hooks/useIsMobile";
 
 interface CountdownTimerProps {
-  initialSeconds: number;
+  totalDuration: number;
+  startTime: number | null;
 }
 
-const CountdownTimer: React.FC<CountdownTimerProps> = ({ initialSeconds }) => {
-  const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
+const CountdownTimer: React.FC<CountdownTimerProps> = ({
+  totalDuration,
+  startTime,
+}) => {
+  const [secondsLeft, setSecondsLeft] = useState(totalDuration);
   const isMobile = useIsMobile(640);
   useEffect(() => {
-    // Ensure we don't start a timer if the initial time is 0
-    if (initialSeconds <= 0) return;
+    // If there's no start time, we can't calculate anything.
+    if (!startTime) {
+      setSecondsLeft(totalDuration);
+      return;
+    }
 
-    // Reset the timer if the initialSeconds prop changes
-    setSecondsLeft(initialSeconds);
+    // This function calculates the time left and updates the state.
+    const updateRemainingTime = () => {
+      const elapsedMs = Date.now() - startTime;
+      const elapsedSeconds = Math.floor(elapsedMs / 1000);
+      const remaining = Math.max(0, totalDuration - elapsedSeconds);
+      setSecondsLeft(remaining);
+      return remaining;
+    };
 
-    const interval = setInterval(() => {
-      setSecondsLeft((prevSeconds) => {
-        if (prevSeconds <= 1) {
+    // Update the time immediately when the component loads
+    const initialRemaining = updateRemainingTime();
+
+    // Only start the interval if there's time left
+    if (initialRemaining > 0) {
+      const interval = setInterval(() => {
+        if (updateRemainingTime() <= 0) {
           clearInterval(interval);
-          return 0;
         }
-        return prevSeconds - 1;
-      });
-    }, 1000);
+      }, 1000);
 
-    // Cleanup function to clear the interval when the component unmounts
-    return () => clearInterval(interval);
-  }, [initialSeconds]);
+      // Cleanup function to clear the interval
+      return () => clearInterval(interval);
+    }
+  }, [startTime, totalDuration]);
 
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
-  const progress = secondsLeft / initialSeconds;
+  // The progress is now calculated based on the total duration
+  const progress = totalDuration > 0 ? secondsLeft / totalDuration : 0;
   const strokeDashoffset = circumference * (1 - progress);
 
   return (
@@ -80,7 +96,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ initialSeconds }) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "white",
+          color: isMobile ? "white" : "#E7E1FF",
           fontSize: "24px",
           textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
         }}

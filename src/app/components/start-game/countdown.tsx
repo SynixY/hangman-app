@@ -4,12 +4,15 @@ import { useGameStore } from "@/app/stores/useGameStore";
 import Number3 from "./number-3";
 import Number2 from "./number-2";
 import Number1 from "./number-1";
+import { useShallow } from "zustand/shallow";
 
 export default function Countdown() {
   const [countdown, setCountdown] = useState(3);
   const setView = useGameStore((state) => state.setView);
-  const setCountdownModalOpen = useGameStore(
-    (state) => state.setCountdownModalOpen
+  const { setCountdownModalOpen } = useGameStore(
+    useShallow((state) => ({
+      setCountdownModalOpen: state.setCountdownModalOpen,
+    }))
   );
 
   useEffect(() => {
@@ -30,7 +33,10 @@ export default function Countdown() {
   }, [countdown, setView, setCountdownModalOpen]);
 
   return (
-    <div className="jsx-632766508 fade-enter-done" style={{ zIndex: 200 }}>
+    <div
+      className="jsx-632766508 fade-enter-done"
+      style={{ zIndex: 200, height: "100%" }}
+    >
       <span className="jsx-632766508 lottie">
         {countdown === 3 && <Number3 />}
         {countdown === 2 && <Number2 />}
